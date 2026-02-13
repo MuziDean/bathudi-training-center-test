@@ -67,19 +67,24 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onStudentPorta
           className="flex items-center space-x-3 cursor-pointer group"
           onClick={handleLogoClick}
         >
-          <div className="relative">
-            <img 
-              src="bathudi logo.png" 
-              alt="Bathudi Training Center Logo" 
-              className="h-20 md:h-27 w-auto transition-all duration-300 group-hover:scale-110 group-hover:rotate-2"
-              onError={() => setLogoError(true)}
-            />
-            {logoError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-red-600 rounded-lg">
-                <span className="text-white font-bold text-lg">BTC</span>
-              </div>
-            )}
-          </div>
+         <div className="relative">
+  <img 
+    src="/images/bathudi logo.png" 
+    alt="Bathudi Training Center Logo" 
+    className="h-20 md:h-27 w-auto transition-all duration-300 group-hover:scale-110 group-hover:rotate-2"
+    onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget;
+      img.onerror = null; // Prevent infinite loop
+      console.error("Logo image failed to load. Check the path: /images/bathudi logo.png");
+      setLogoError(true);
+    }}
+  />
+  {logoError && (
+    <div className="absolute inset-0 flex items-center justify-center bg-red-600 rounded-lg">
+      <span className="text-white font-bold text-lg">BTC</span>
+    </div>
+  )}
+</div>
           <div className="flex flex-col">
             <span className="font-orbitron font-bold text-xl md:text-2xl text-white tracking-tight leading-none">
               BATHUDI

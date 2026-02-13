@@ -32,14 +32,14 @@ const ElegantPreloader: React.FC = () => {
         <div className="relative mb-12">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl shadow-blue-500/20">
             <img 
-              src="/logo1.jpg" 
-              alt="Bathudi Logo" 
-              className="w-full h-full object-cover"
-              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                const img = e.currentTarget;
-                img.onerror = null; // Prevent infinite loop
-                console.error("Logo image failed to load. Check the path: /logo1.jpg");
-              }}
+      src="/images/logo1.jpg" 
+      alt="Bathudi Logo" 
+      className="w-full h-full object-cover"
+      onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+        const img = e.currentTarget;
+        img.onerror = null; // Prevent infinite loop
+        console.error("Logo image failed to load. Check the path: /images/logo1.jpg");
+      }}
             />
           </div>
           
