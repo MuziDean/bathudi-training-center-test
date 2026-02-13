@@ -13,6 +13,9 @@ interface HomeProps {
   onViewNews: (id: string) => void;
 }
 
+// FIXED: Use environment variable for API
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
   const HARDCODED_SLOGANS: Slogan[] = [
     {
@@ -43,24 +46,29 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
   const [bgImageIdx, setBgImageIdx] = useState(0);
   const [directorData, setDirectorData] = useState<any>(null);
   
-  // Updated: Added more images to the background rotation (up to 11)
   const bgImages = ['1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg', '9.jpg', '16.jpg', '18.jpg'];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('Fetching from:', API_BASE_URL);
+        
         const [nRes, dRes] = await Promise.all([
-          fetch('http://127.0.0.1:8000/api/news-posts/'),
-          fetch('http://127.0.0.1:8000/api/director-message/active/')
+          fetch(`${API_BASE_URL}/news-posts/`),
+          fetch(`${API_BASE_URL}/director-message/active/`)
         ]);
         
         if (nRes.ok) {
           const newsData = await nRes.json();
+          console.log('News data fetched:', newsData.length);
           setNewsPosts(newsData.slice(0, 3));
+        } else {
+          console.warn('News fetch failed:', nRes.status);
         }
         
         if (dRes.ok) {
           const directorData = await dRes.json();
+          console.log('Director data fetched:', directorData);
           setDirectorData(directorData);
         }
       } catch (e) { 
@@ -157,7 +165,6 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            {/* Updated Apply Now button with glassy dark red */}
             <button 
               onClick={() => onNavigate(Page.Apply)} 
               className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg shadow-xl transition-all

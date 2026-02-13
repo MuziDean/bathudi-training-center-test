@@ -297,10 +297,17 @@ const AdminCMS: React.FC = () => {
 
       console.log('Sending director message to:', url);
       
+      // Add timeout for large files (5 minutes)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
+
       const res = await fetch(url, {
         method: method,
         body: formData,
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       console.log('Director message response status:', res.status);
       
@@ -322,7 +329,11 @@ const AdminCMS: React.FC = () => {
       fetchData();
     } catch (error: any) {
       console.error('Director message error:', error);
-      showStatus('Server error: ' + error.message, 'error');
+      if (error.name === 'AbortError') {
+        showStatus('Upload timeout: Video file may be too large (max 100MB recommended)', 'error');
+      } else {
+        showStatus('Server error: ' + error.message, 'error');
+      }
     } finally {
       setIsUpdating(false);
     }
@@ -670,6 +681,7 @@ const AdminCMS: React.FC = () => {
                               </div>
                               <p className="text-gray-300 mb-1">{selectedVideoFile.name}</p>
                               <p className="text-sm text-gray-400">Size: {(selectedVideoFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                              <p className="text-sm text-red-400 mt-2">Max recommended: 100MB. Larger files may time out.</p>
                               <p className="text-sm text-blue-400 mt-2">Click to change video</p>
                             </>
                           ) : (
@@ -678,7 +690,7 @@ const AdminCMS: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                               </svg>
                               <p className="text-gray-300 mb-2">Click to select a video file</p>
-                              <p className="text-sm text-gray-400">Supports MP4, WebM, MOV</p>
+                              <p className="text-sm text-gray-400">Supports MP4, WebM, MOV (Max 100MB)</p>
                               <button
                                 type="button"
                                 onClick={() => document.getElementById('video-upload')?.click()}
