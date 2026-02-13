@@ -100,11 +100,9 @@ const AdminApplications: React.FC = () => {
         setApplications(data);
       } else {
         console.error('Failed to fetch applications:', response.status);
-        alert(`Failed to fetch applications: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
-      alert('Error connecting to server. Make sure Django is running.');
     } finally {
       setLoading(false);
     }
@@ -130,10 +128,59 @@ const AdminApplications: React.FC = () => {
     await fetchDocumentUrls(app.id);
   };
 
+  // Function to add approved application to students
+  const addToStudents = async (application: Application) => {
+    try {
+      // Prepare student data from application
+      const studentData = {
+        name: application.name,
+        surname: application.surname,
+        email: application.email,
+        phone: application.mobile,
+        address: application.address,
+        id_number: application.id_number,
+        age: application.age,
+        country: application.country,
+        education_level: application.education_level,
+        previous_school: application.previous_school,
+        course: application.course, // This should be course ID
+        status: 'Active',
+        fees_status: application.fee_verified ? 'Paid' : 'Pending',
+        // Document status from application
+        documents_status: application.documents_status
+      };
+
+      console.log('Adding to students:', studentData);
+
+      const response = await fetch(`${API_BASE_URL}/students/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(studentData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Student added successfully:', result);
+        return true;
+      } else {
+        const error = await response.json();
+        console.error('Failed to add student:', error);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error adding to students:', error);
+      return false;
+    }
+  };
+
   const handleApprove = async (appId: number) => {
-    if (window.confirm('Are you sure you want to approve this application?')) {
+    if (window.confirm('Are you sure you want to approve this application? This will add the student to the registry.')) {
       try {
         setProcessing(appId);
+        
+        // First, approve the application
         const response = await fetch(`${API_BASE_URL}/applications/${appId}/approve/`, {
           method: 'PATCH',
           headers: {
@@ -143,7 +190,23 @@ const AdminApplications: React.FC = () => {
         
         if (response.ok) {
           const result = await response.json();
-          alert(`✅ ${result.message || 'Application approved successfully!'}`);
+          
+          // Find the application that was approved
+          const approvedApp = applications.find(app => app.id === appId);
+          
+          if (approvedApp) {
+            // Add to students list
+            const studentAdded = await addToStudents(approvedApp);
+            
+            if (studentAdded) {
+              alert(`✅ Application approved and student added to registry successfully!`);
+            } else {
+              alert(`⚠️ Application approved but failed to add to student registry. Please add manually.`);
+            }
+          } else {
+            alert(`✅ ${result.message || 'Application approved successfully!'}`);
+          }
+          
           fetchApplications(); // Refresh the list
           if (selectedApp?.id === appId) {
             setSelectedApp(null);
@@ -276,7 +339,7 @@ const AdminApplications: React.FC = () => {
     <div className="space-y-8 p-4 md:p-6">
       <header>
         <h1 className="text-3xl font-bold text-white mb-2">📋 Applications Review</h1>
-        <p className="text-gray-400">Review student submissions and fee confirmations.</p>
+        <p className="text-gray-400">Review student submissions and fee confirmations. Approving an application automatically adds the student to the registry.</p>
         
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
@@ -619,7 +682,7 @@ const AdminApplications: React.FC = () => {
                   disabled={processing === selectedApp.id}
                   className="px-6 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-green-600/20"
                 >
-                  {processing === selectedApp.id ? 'Processing...' : 'Approve'}
+                  {processing === selectedApp.id ? 'Processing...' : 'Approve & Enroll'}
                 </button>
               </div>
             </div>
@@ -748,7 +811,7 @@ const AdminApplications: React.FC = () => {
                     disabled={processing === app.id || app.status === 'approved'}
                     className="px-4 py-2 text-xs bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-bold transition-all"
                   >
-                    {app.status === 'approved' ? 'Approved' : 'Approve'}
+                    {app.status === 'approved' ? 'Approved' : 'Approve & Enroll'}
                   </button>
                 </div>
               </div>
