@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+// FIXED: Use environment variable for API base URL
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 type Tab = 'news' | 'gallery' | 'video';
 
@@ -34,31 +35,33 @@ const AdminCMS: React.FC = () => {
   // ---------------- FETCH DATA ----------------
   const fetchData = async () => {
     try {
+      console.log('Fetching from:', API_BASE);
+      
       const [news, gallery, director] = await Promise.all([
         fetch(`${API_BASE}/news-posts/`),
         fetch(`${API_BASE}/gallery/`),
         fetch(`${API_BASE}/director-message/active/`),
       ]);
 
-      // Check if response is JSON
-      const newsContentType = news.headers.get('content-type');
-      const galleryContentType = gallery.headers.get('content-type');
-      const directorContentType = director.headers.get('content-type');
+      console.log('News response status:', news.status);
+      console.log('Gallery response status:', gallery.status);
+      console.log('Director response status:', director.status);
 
-      if (news.ok && newsContentType && newsContentType.includes('application/json')) {
+      // Check if response is JSON
+      if (news.ok) {
         const newsData = await news.json();
         setNewsPosts(newsData);
       } else {
         const text = await news.text();
-        console.error('News response not JSON:', text.substring(0, 200));
+        console.error('News response not OK:', news.status, text.substring(0, 200));
       }
       
-      if (gallery.ok && galleryContentType && galleryContentType.includes('application/json')) {
+      if (gallery.ok) {
         const galleryData = await gallery.json();
         setGalleryImages(galleryData);
       }
 
-      if (director.ok && directorContentType && directorContentType.includes('application/json')) {
+      if (director.ok) {
         const data = await director.json();
         if (data && Object.keys(data).length > 0) {
           setDirectorMessage(data);
@@ -128,26 +131,22 @@ const AdminCMS: React.FC = () => {
         formData.append('image', selectedNewsImage);
       }
 
+      console.log('Posting to:', `${API_BASE}/news-posts/`);
+      
       const res = await fetch(`${API_BASE}/news-posts/`, {
         method: 'POST',
         body: formData,
       });
 
-      const contentType = res.headers.get('content-type');
+      console.log('News post response status:', res.status);
       
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
-        console.error('Server returned HTML instead of JSON:', text.substring(0, 500));
-        throw new Error('Server error - check Django logs');
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Server error response:', errorText.substring(0, 500));
+        throw new Error(`Server error: ${res.status}`);
       }
 
       const result = await res.json();
-      
-      if (!res.ok) {
-        console.error('News POST error:', result);
-        throw new Error(result.detail || 'Failed to save news post');
-      }
-
       console.log('News POST success:', result);
       
       // Reset form
@@ -200,6 +199,9 @@ const AdminCMS: React.FC = () => {
     }
 
     setIsUpdating(true);
+    let successCount = 0;
+    let errorCount = 0;
+
     try {
       for (const file of selectedFiles) {
         const fd = new FormData();
@@ -208,19 +210,29 @@ const AdminCMS: React.FC = () => {
         fd.append('description', `Uploaded on ${new Date().toLocaleDateString()}`);
         fd.append('is_active', 'true');
         
+        console.log('Uploading gallery image:', file.name);
+        
         const res = await fetch(`${API_BASE}/gallery/`, {
           method: 'POST',
           body: fd,
         });
         
-        if (!res.ok) {
+        if (res.ok) {
+          successCount++;
+        } else {
+          errorCount++;
           const errorText = await res.text();
-          throw new Error(errorText);
+          console.error('Gallery upload error for', file.name, ':', errorText);
         }
       }
 
+      if (successCount > 0) {
+        showStatus(`Uploaded ${successCount} images successfully!${errorCount > 0 ? ` (${errorCount} failed)` : ''}`, 'success');
+      } else {
+        showStatus('Failed to upload images', 'error');
+      }
+      
       setSelectedFiles([]);
-      showStatus('Images uploaded successfully!', 'success');
       fetchData();
     } catch (error) {
       console.error('Gallery upload error:', error);
@@ -283,26 +295,22 @@ const AdminCMS: React.FC = () => {
         url = `${API_BASE}/director-message/${directorMessage.id}/`;
       }
 
+      console.log('Sending director message to:', url);
+      
       const res = await fetch(url, {
         method: method,
         body: formData,
       });
 
-      const contentType = res.headers.get('content-type');
+      console.log('Director message response status:', res.status);
       
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
-        console.error('Server returned HTML instead of JSON:', text.substring(0, 500));
-        throw new Error('Server error - check Django logs');
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Server error response:', errorText.substring(0, 500));
+        throw new Error(`Server error: ${res.status}`);
       }
 
       const result = await res.json();
-      
-      if (!res.ok) {
-        console.error('Director message error:', result);
-        throw new Error(result.detail || 'Failed to save director message');
-      }
-
       console.log('Director message success:', result);
 
       // Clear video file selection after successful upload
@@ -345,7 +353,7 @@ const AdminCMS: React.FC = () => {
             </span>
           </p>
           <p className="text-sm text-gray-400 mt-1">
-            If you see HTML errors, check Django server is running and there are no Python errors
+            Using environment: {import.meta.env.MODE} | API: {API_BASE}
           </p>
         </div>
 
