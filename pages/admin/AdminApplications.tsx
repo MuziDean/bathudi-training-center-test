@@ -54,8 +54,8 @@ interface ApplicationDocuments {
   } | null;
 }
 
-// Use environment variable for API base URL or fallback to localhost
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+// FIXED: Use import.meta.env for Vite instead of process.env
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 const AdminApplications: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
