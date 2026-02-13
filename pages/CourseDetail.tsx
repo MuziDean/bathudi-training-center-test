@@ -45,7 +45,8 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
         setError(null);
         
         // Try to fetch from backend API
-        const response = await fetch(`http://localhost:8000/api/courses/${courseId}/`);
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+        const response = await fetch(`${API_BASE_URL}/courses/${courseId}/`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,7 +61,6 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
         // Fallback to local COURSES data
         try {
           const { COURSES } = await import('../constants');
-          // FIXED: Convert both to string for comparison
           const localCourse = COURSES.find(c => String(c.id) === String(courseId));
           
           if (localCourse) {
@@ -132,7 +132,9 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
       return;
     }
     
-    const pdfUrl = `http://localhost:8000/pdfs/course-outlines/${pdfFilename}`;
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+    const baseUrl = API_BASE_URL.replace('/api', '');
+    const pdfUrl = `${baseUrl}/pdfs/course-outlines/${pdfFilename}`;
     window.open(pdfUrl, '_blank');
   };
 

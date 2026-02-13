@@ -1,3 +1,4 @@
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 import React, { useState, useEffect } from 'react';
 import { Page } from '../types';
 
@@ -41,7 +42,8 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/courses/');
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_BASE_URL}/courses/`);
       if (response.ok) {
         const data = await response.json();
         setAvailableCourses(data);
@@ -193,7 +195,8 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       
       alert('📤 Submitting your application... Please wait while we process your information.');
       
-      const response = await fetch('http://localhost:8000/api/applications/', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_BASE_URL}/applications/`, {
         method: 'POST',
         body: formDataToSend,
       });

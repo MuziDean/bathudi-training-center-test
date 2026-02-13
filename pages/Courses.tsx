@@ -23,7 +23,8 @@ const Courses: React.FC<CoursesProps> = ({ onNavigate, onViewCourse }) => {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/courses/');
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+        const response = await fetch(`${API_BASE_URL}/courses/`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -63,7 +64,9 @@ const Courses: React.FC<CoursesProps> = ({ onNavigate, onViewCourse }) => {
         const pdfFilename = course.course_pdf_url.split('/').pop();
         
         if (pdfFilename) {
-          const pdfUrl = `http://localhost:8000/pdfs/course-outlines/${pdfFilename}`;
+          const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+          const baseUrl = API_BASE_URL.replace('/api', '');
+          const pdfUrl = `${baseUrl}/pdfs/course-outlines/${pdfFilename}`;
           window.open(pdfUrl, '_blank');
         } else {
           throw new Error('Invalid PDF filename');
@@ -86,7 +89,6 @@ const Courses: React.FC<CoursesProps> = ({ onNavigate, onViewCourse }) => {
 
   const handleViewCourse = (courseId: string | number) => {
     if (onViewCourse) {
-      // FIXED: Convert number to string
       onViewCourse(String(courseId));
     } else {
       console.warn('onViewCourse function not provided');
@@ -112,7 +114,7 @@ const Courses: React.FC<CoursesProps> = ({ onNavigate, onViewCourse }) => {
               <div key={course.id} className="group relative glass rounded-2xl overflow-hidden border border-white/5 transition-all hover:border-blue-500/30 hover:transform hover:-translate-y-1 duration-300">
                 <div className="w-full h-40 overflow-hidden">
                   <img 
-                    src={coverImage} 
+                    src={`/images/${coverImage}`} 
                     alt={course.title} 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
