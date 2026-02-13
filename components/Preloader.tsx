@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 const ElegantPreloader: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -31,16 +32,25 @@ const ElegantPreloader: React.FC = () => {
       <div className="relative z-10 flex flex-col items-center justify-center p-8">
         <div className="relative mb-12">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl shadow-blue-500/20">
-            <img 
-      src="/images/logo1.jpg" 
-      alt="Bathudi Logo" 
-      className="w-full h-full object-cover"
-      onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-        const img = e.currentTarget;
-        img.onerror = null; // Prevent infinite loop
-        console.error("Logo image failed to load. Check the path: /images/logo1.jpg");
-      }}
-            />
+            {!imageError ? (
+              <img 
+                src="/images/logo1.jpg" 
+                alt="Bathudi Logo" 
+                className="w-full h-full object-cover"
+                onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                  const img = e.currentTarget;
+                  console.error("❌ Preloader logo failed to load. Attempted path:", img.src);
+                  console.log("Current window location:", window.location.href);
+                  console.log("Base URL:", document.baseURI);
+                  setImageError(true);
+                }}
+                onLoad={() => console.log("✅ Preloader logo loaded successfully from:", "/images/logo1.jpg")}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+                <span className="text-white font-bold text-2xl">BTC</span>
+              </div>
+            )}
           </div>
           
           {[...Array(3)].map((_, i) => (
