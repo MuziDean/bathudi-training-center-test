@@ -272,10 +272,10 @@ const AdminStudents: React.FC = () => {
         </div>
       </header>
 
-      {/* Add Student Modal */}
+      {/* Add Student Modal - FIXED: Increased z-index and improved dropdown styling */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="glass p-6 md:p-8 rounded-3xl border border-white/5 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
+          <div className="glass p-6 md:p-8 rounded-3xl border border-white/5 max-w-4xl w-full max-h-[90vh] overflow-y-auto" style={{ zIndex: 10000 }}>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-white">📝 Enroll New Student</h2>
               <button 
@@ -298,7 +298,7 @@ const AdminStudents: React.FC = () => {
                       name="name"
                       value={newStudent.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
                       placeholder="Enter first name"
                     />
                   </div>
@@ -309,7 +309,7 @@ const AdminStudents: React.FC = () => {
                       name="surname"
                       value={newStudent.surname}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
                       placeholder="Enter last name"
                     />
                   </div>
@@ -320,7 +320,7 @@ const AdminStudents: React.FC = () => {
                       name="email"
                       value={newStudent.email}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
                       placeholder="student@example.com"
                     />
                   </div>
@@ -331,7 +331,7 @@ const AdminStudents: React.FC = () => {
                       name="phone"
                       value={newStudent.phone}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
                       placeholder="0712345678"
                     />
                   </div>
@@ -342,7 +342,7 @@ const AdminStudents: React.FC = () => {
                       name="id_number"
                       value={newStudent.id_number}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
                       placeholder="Enter ID number"
                     />
                   </div>
@@ -353,7 +353,7 @@ const AdminStudents: React.FC = () => {
                       name="age"
                       value={newStudent.age}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
                       placeholder="Age"
                       min="16"
                       max="65"
@@ -365,14 +365,15 @@ const AdminStudents: React.FC = () => {
                       name="country"
                       value={newStudent.country}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white appearance-none cursor-pointer"
+                      style={{ color: 'white' }}
                     >
-                      <option value="South Africa">South Africa</option>
-                      <option value="Lesotho">Lesotho</option>
-                      <option value="Botswana">Botswana</option>
-                      <option value="Eswatini">Eswatini</option>
-                      <option value="Zimbabwe">Zimbabwe</option>
-                      <option value="Mozambique">Mozambique</option>
+                      <option value="South Africa" className="bg-gray-800 text-white">South Africa</option>
+                      <option value="Lesotho" className="bg-gray-800 text-white">Lesotho</option>
+                      <option value="Botswana" className="bg-gray-800 text-white">Botswana</option>
+                      <option value="Eswatini" className="bg-gray-800 text-white">Eswatini</option>
+                      <option value="Zimbabwe" className="bg-gray-800 text-white">Zimbabwe</option>
+                      <option value="Mozambique" className="bg-gray-800 text-white">Mozambique</option>
                     </select>
                   </div>
                   <div className="md:col-span-2">
@@ -381,7 +382,7 @@ const AdminStudents: React.FC = () => {
                       name="address"
                       value={newStudent.address}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
                       placeholder="Physical address"
                       rows={2}
                     />
@@ -389,7 +390,7 @@ const AdminStudents: React.FC = () => {
                 </div>
               </div>
 
-              {/* Education Information */}
+              {/* Education Information - FIXED: Dropdowns now visible with proper colors */}
               <div className="p-6 rounded-xl bg-slate-900/50 border border-white/5">
                 <h3 className="text-lg font-bold text-white mb-4">Education & Course</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -399,17 +400,18 @@ const AdminStudents: React.FC = () => {
                       name="education_level"
                       value={newStudent.education_level}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white appearance-none cursor-pointer"
+                      style={{ color: 'white' }}
                     >
-                      <option value="">Select Education Level</option>
-                      <option value="Grade 10">Grade 10</option>
-                      <option value="Grade 11">Grade 11</option>
-                      <option value="Grade 12 (Matric)">Grade 12 (Matric)</option>
-                      <option value="N3">N3</option>
-                      <option value="N4">N4</option>
-                      <option value="Certificate">Certificate</option>
-                      <option value="Diploma">Diploma</option>
-                      <option value="Degree">Degree</option>
+                      <option value="" className="bg-gray-800 text-white">Select Education Level</option>
+                      <option value="Grade 10" className="bg-gray-800 text-white">Grade 10</option>
+                      <option value="Grade 11" className="bg-gray-800 text-white">Grade 11</option>
+                      <option value="Grade 12 (Matric)" className="bg-gray-800 text-white">Grade 12 (Matric)</option>
+                      <option value="N3" className="bg-gray-800 text-white">N3</option>
+                      <option value="N4" className="bg-gray-800 text-white">N4</option>
+                      <option value="Certificate" className="bg-gray-800 text-white">Certificate</option>
+                      <option value="Diploma" className="bg-gray-800 text-white">Diploma</option>
+                      <option value="Degree" className="bg-gray-800 text-white">Degree</option>
                     </select>
                   </div>
                   <div>
@@ -419,7 +421,7 @@ const AdminStudents: React.FC = () => {
                       name="previous_school"
                       value={newStudent.previous_school}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
                       placeholder="Previous school/institution"
                     />
                   </div>
@@ -429,10 +431,11 @@ const AdminStudents: React.FC = () => {
                       name="course_id"
                       value={newStudent.course_id}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white appearance-none cursor-pointer"
+                      style={{ color: 'white' }}
                     >
                       {availableCourses.map(course => (
-                        <option key={course.id} value={course.id}>
+                        <option key={course.id} value={course.id} className="bg-gray-800 text-white">
                           {course.title}
                         </option>
                       ))}
@@ -448,7 +451,7 @@ const AdminStudents: React.FC = () => {
                   <div>
                     <h4 className="text-sm text-gray-400 mb-3">Document Availability (Check if available)</h4>
                     <div className="space-y-3">
-                      <label className="flex items-center space-x-3">
+                      <label className="flex items-center space-x-3 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={newStudent.documents.id}
@@ -457,7 +460,7 @@ const AdminStudents: React.FC = () => {
                         />
                         <span className="text-white">ID Document Available</span>
                       </label>
-                      <label className="flex items-center space-x-3">
+                      <label className="flex items-center space-x-3 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={newStudent.documents.matric}
@@ -466,7 +469,7 @@ const AdminStudents: React.FC = () => {
                         />
                         <span className="text-white">Matric Certificate Available</span>
                       </label>
-                      <label className="flex items-center space-x-3">
+                      <label className="flex items-center space-x-3 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={newStudent.documents.pop}
@@ -475,7 +478,7 @@ const AdminStudents: React.FC = () => {
                         />
                         <span className="text-white">Proof of Payment Available (R661.25)</span>
                       </label>
-                      <label className="flex items-center space-x-3">
+                      <label className="flex items-center space-x-3 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={newStudent.documents.additional}
@@ -494,12 +497,13 @@ const AdminStudents: React.FC = () => {
                         <select
                           value={newStudent.fees_status}
                           onChange={(e) => setNewStudent({...newStudent, fees_status: e.target.value as FeeStatus})}
-                          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white appearance-none cursor-pointer"
+                          style={{ color: 'white' }}
                         >
-                          <option value={FeeStatus.Pending}>Pending</option>
-                          <option value={FeeStatus.Paid}>Paid</option>
-                          <option value={FeeStatus.Partial}>Partial</option>
-                          <option value={FeeStatus.Outstanding}>Outstanding</option>
+                          <option value={FeeStatus.Pending} className="bg-gray-800 text-white">Pending</option>
+                          <option value={FeeStatus.Paid} className="bg-gray-800 text-white">Paid</option>
+                          <option value={FeeStatus.Partial} className="bg-gray-800 text-white">Partial</option>
+                          <option value={FeeStatus.Outstanding} className="bg-gray-800 text-white">Outstanding</option>
                         </select>
                       </div>
                     </div>

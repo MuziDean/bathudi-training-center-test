@@ -270,19 +270,20 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Test API connection function
+  // Test API connection function - FIXED: Use API_BASE_URL
   const testAPIConnection = async () => {
     try {
       alert('🔌 Testing connection to server...');
-      const response = await fetch('http://localhost:8000/api/applications/');
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_BASE_URL}/applications/`);
       if (response.ok) {
         const data = await response.json();
         alert(`✅ Server connection successful!\n\nFound ${data.length} applications in the system.\n\nServer is ready to accept your application.`);
       } else {
-        alert(`⚠️ Server responded with error ${response.status}\n\nMake sure Django server is running on http://localhost:8000`);
+        alert(`⚠️ Server responded with error ${response.status}\n\nCheck your backend connection.`);
       }
     } catch (error) {
-      alert('❌ Cannot connect to server!\n\nPlease ensure:\n1. Django server is running on http://localhost:8000\n2. CORS is properly configured\n3. You have a stable internet connection');
+      alert('❌ Cannot connect to server!\n\nPlease ensure your backend is running and CORS is configured.');
     }
   };
 
@@ -445,18 +446,19 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     value={formData.country}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer"
+                    style={{ color: 'white' }}
                     required
                   >
-                    <option value="South Africa">South Africa</option>
-                    <option value="Lesotho">Lesotho</option>
-                    <option value="Botswana">Botswana</option>
-                    <option value="Eswatini">Eswatini</option>
-                    <option value="Namibia">Namibia</option>
-                    <option value="Zimbabwe">Zimbabwe</option>
-                    <option value="Mozambique">Mozambique</option>
-                    <option value="Zambia">Zambia</option>
-                    <option value="Other">Other African Country</option>
-                    <option value="International">International</option>
+                    <option value="South Africa" style={{ backgroundColor: '#1f2937', color: 'white' }}>South Africa</option>
+                    <option value="Lesotho" style={{ backgroundColor: '#1f2937', color: 'white' }}>Lesotho</option>
+                    <option value="Botswana" style={{ backgroundColor: '#1f2937', color: 'white' }}>Botswana</option>
+                    <option value="Eswatini" style={{ backgroundColor: '#1f2937', color: 'white' }}>Eswatini</option>
+                    <option value="Namibia" style={{ backgroundColor: '#1f2937', color: 'white' }}>Namibia</option>
+                    <option value="Zimbabwe" style={{ backgroundColor: '#1f2937', color: 'white' }}>Zimbabwe</option>
+                    <option value="Mozambique" style={{ backgroundColor: '#1f2937', color: 'white' }}>Mozambique</option>
+                    <option value="Zambia" style={{ backgroundColor: '#1f2937', color: 'white' }}>Zambia</option>
+                    <option value="Other" style={{ backgroundColor: '#1f2937', color: 'white' }}>Other African Country</option>
+                    <option value="International" style={{ backgroundColor: '#1f2937', color: 'white' }}>International</option>
                   </select>
                 </div>
                 
@@ -507,7 +509,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Section 2: Education Information */}
+            {/* Section 2: Education Information - FIXED: Dropdown colors */}
             <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
               <h3 className="text-xl font-bold text-white mb-6 flex items-center">
                 <span className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center mr-3">2</span>
@@ -524,20 +526,21 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     value={formData.education_level}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer"
+                    style={{ color: 'white' }}
                     required
                   >
-                    <option value="" className="text-gray-500">Select your education level</option>
-                    <option value="Grade 10" className="text-white">Grade 10</option>
-                    <option value="Grade 11" className="text-white">Grade 11</option>
-                    <option value="Grade 12 (Matric)" className="text-white">Grade 12 (Matric)</option>
-                    <option value="N3" className="text-white">N3</option>
-                    <option value="N4" className="text-white">N4</option>
-                    <option value="N5" className="text-white">N5</option>
-                    <option value="N6" className="text-white">N6</option>
-                    <option value="Certificate" className="text-white">Certificate</option>
-                    <option value="Diploma" className="text-white">Diploma</option>
-                    <option value="Degree" className="text-white">Degree</option>
-                    <option value="Other" className="text-white">Other Qualification</option>
+                    <option value="" style={{ backgroundColor: '#1f2937', color: 'white' }}>Select your education level</option>
+                    <option value="Grade 10" style={{ backgroundColor: '#1f2937', color: 'white' }}>Grade 10</option>
+                    <option value="Grade 11" style={{ backgroundColor: '#1f2937', color: 'white' }}>Grade 11</option>
+                    <option value="Grade 12 (Matric)" style={{ backgroundColor: '#1f2937', color: 'white' }}>Grade 12 (Matric)</option>
+                    <option value="N3" style={{ backgroundColor: '#1f2937', color: 'white' }}>N3</option>
+                    <option value="N4" style={{ backgroundColor: '#1f2937', color: 'white' }}>N4</option>
+                    <option value="N5" style={{ backgroundColor: '#1f2937', color: 'white' }}>N5</option>
+                    <option value="N6" style={{ backgroundColor: '#1f2937', color: 'white' }}>N6</option>
+                    <option value="Certificate" style={{ backgroundColor: '#1f2937', color: 'white' }}>Certificate</option>
+                    <option value="Diploma" style={{ backgroundColor: '#1f2937', color: 'white' }}>Diploma</option>
+                    <option value="Degree" style={{ backgroundColor: '#1f2937', color: 'white' }}>Degree</option>
+                    <option value="Other" style={{ backgroundColor: '#1f2937', color: 'white' }}>Other Qualification</option>
                   </select>
                 </div>
                 
@@ -565,24 +568,25 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     value={formData.course}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer"
+                    style={{ color: 'white' }}
                     required
                   >
-                    <option value="" className="text-gray-500">Select a course</option>
-                    <option value="automotive_engine_repairer" className="text-white">
+                    <option value="" style={{ backgroundColor: '#1f2937', color: 'white' }}>Select a course</option>
+                    <option value="automotive_engine_repairer" style={{ backgroundColor: '#1f2937', color: 'white' }}>
                       Occupational Certificate: Automotive Engine Repairer
                     </option>
-                    <option value="automotive_clutch_brake_repairer" className="text-white">
+                    <option value="automotive_clutch_brake_repairer" style={{ backgroundColor: '#1f2937', color: 'white' }}>
                       Occupational Certificate: Automotive Clutch and Brake Repairer
                     </option>
-                    <option value="automotive_suspension_fitter" className="text-white">
+                    <option value="automotive_suspension_fitter" style={{ backgroundColor: '#1f2937', color: 'white' }}>
                       Occupational Certificate: Automotive Suspension Fitter
                     </option>
-                    <option value="automotive_workshop_assistant" className="text-white">
+                    <option value="automotive_workshop_assistant" style={{ backgroundColor: '#1f2937', color: 'white' }}>
                       Occupational Certificate: Automotive Workshop Assistant
                     </option>
                     {/* Dynamic courses from backend */}
                     {availableCourses.map(course => (
-                      <option key={course.id} value={course.id} className="text-white">
+                      <option key={course.id} value={course.id} style={{ backgroundColor: '#1f2937', color: 'white' }}>
                         {course.title}
                       </option>
                     ))}
