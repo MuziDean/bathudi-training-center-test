@@ -89,7 +89,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onStudentPorta
       BATHUDI
     </span>
     <span className="text-xs md:text-sm text-red-400 font-medium tracking-widest uppercase">
-      Training Center
+       Automotive Technical Center
     </span>
   </div>
 </div>

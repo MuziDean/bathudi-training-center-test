@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const About: React.FC = () => {
@@ -10,7 +9,7 @@ const About: React.FC = () => {
             <div className="absolute -inset-4 bg-blue-600/20 blur-3xl rounded-full" />
             <div className="relative rounded-3xl overflow-hidden glass border border-white/10 p-2">
               <img 
-                src="9.jpg" 
+                src="/images/28.jpg" 
                 alt="About us" 
                 className="w-full h-full object-cover rounded-2xl"
                 onError={(e) => {
@@ -34,8 +33,6 @@ const About: React.FC = () => {
 
              We empower young people to build real skills with their hands, gain confidence in their abilities, and shape sustainable futures through accredited technical training. As a QCTO–accredited institution, we offer high-quality, industry-aligned automotive skills programmes that prepare learners for employment, entrepreneurship, and lifelong growth.</p>
 
-      
-            
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="flex items-start space-x-4">
                 <div className="w-12 h-12 bg-blue-600/20 rounded-xl flex items-center justify-center text-blue-400 shrink-0">
@@ -52,7 +49,7 @@ const About: React.FC = () => {
                 </div>
                 <div>
                   <h5 className="text-white font-bold mb-1">Our Vision</h5>
-                  <p className="text-gray-400 text-xs uppercase tracking-wider">To be the #1 automotive hub in Gauteng.</p>
+                  <p className="text-gray-400 text-xs uppercase tracking-wider">To be the #1 automotive training centre in Gauteng.</p>
                 </div>
               </div>
             </div>
