@@ -1,15 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Page } from '../types';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+// FIXED: Use environment variable for API URL
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface NewsDetailProps {
   newsId: string | null;
   onBack: () => void;
 }
 
+interface NewsPost {
+  id: number;
+  title: string;
+  content: string;
+  preview_text: string;
+  image_url?: string;
+  created_at: string;
+  updated_at: string;
+  is_published: boolean;
+}
+
 const NewsDetail: React.FC<NewsDetailProps> = ({ newsId, onBack }) => {
-  const [news, setNews] = useState<any>(null);
+  const [news, setNews] = useState<NewsPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -23,15 +35,18 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ newsId, onBack }) => {
 
       try {
         setLoading(true);
+        console.log('Fetching news from:', `${API_BASE}/news-posts/${newsId}/`);
+        
         const res = await fetch(`${API_BASE}/news-posts/${newsId}/`);
         
         if (!res.ok) {
-          throw new Error('News not found');
+          throw new Error(`News not found (${res.status})`);
         }
         
         const data = await res.json();
         setNews(data);
       } catch (err: any) {
+        console.error('Error fetching news:', err);
         setError(err.message || 'Failed to load news');
       } finally {
         setLoading(false);
@@ -40,6 +55,14 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ newsId, onBack }) => {
 
     fetchNews();
   }, [newsId]);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   if (loading) {
     return (
@@ -114,11 +137,7 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ newsId, onBack }) => {
               Campus News
             </span>
             <span>
-              {new Date(news.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              {formatDate(news.created_at)}
             </span>
           </div>
           
@@ -162,11 +181,7 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ newsId, onBack }) => {
         <footer className="pt-8 border-t border-white/10">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-500">
-              Last updated: {new Date(news.updated_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              Last updated: {formatDate(news.updated_at)}
             </div>
             
             <button
