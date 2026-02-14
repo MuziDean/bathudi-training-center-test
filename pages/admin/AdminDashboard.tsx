@@ -18,6 +18,7 @@ const AdminDashboard: React.FC = () => {
   });
   const [recentApps, setRecentApps] = useState<RecentApplication[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -114,14 +115,34 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="space-y-10">
-      <header>
-        <h1 className="text-3xl font-orbitron font-bold text-white mb-2">Management Dashboard</h1>
-        <p className="text-gray-400">Welcome back, Admin. Here is an overview of Bathudi Training Center today.</p>
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center space-x-4">
+          {/* FIXED: Added logo to dashboard header */}
+          <div className="relative w-12 h-12 rounded-xl overflow-hidden glass border border-white/10">
+            {!logoError ? (
+              <img 
+                src="/images/bathudi logo.png" 
+                alt="Bathudi Logo" 
+                className="w-full h-full object-contain"
+                onError={() => setLogoError(true)}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">B</span>
+              </div>
+            )}
+          </div>
+          <div>
+            <h1 className="text-3xl font-orbitron font-bold text-white mb-1">Management Dashboard</h1>
+            <p className="text-gray-400 text-sm">Bathudi Automotive Technical Center</p>
+          </div>
+        </div>
         <button 
           onClick={fetchDashboardData}
-          className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold transition-all"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold transition-all flex items-center space-x-2"
         >
-          Refresh Data
+          <span>🔄</span>
+          <span>Refresh Data</span>
         </button>
       </header>
 

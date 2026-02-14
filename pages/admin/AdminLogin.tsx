@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 interface AdminLoginProps {
@@ -10,6 +9,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [logoError, setLogoError] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +30,21 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => {
       <div className="w-full max-w-md animate-fadeIn">
         <div className="glass p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
           <div className="text-center mb-8">
-            <img src="bathudi logo.png" alt="Logo" className="h-20 w-auto mx-auto mb-6" />
+            {/* FIXED: Logo with correct path and error handling */}
+            <div className="relative w-24 h-24 mx-auto mb-6">
+              {!logoError ? (
+                <img 
+                  src="/images/bathudi logo.png" 
+                  alt="Bathudi Automotive Technical Center Logo" 
+                  className="w-full h-full object-contain"
+                  onError={() => setLogoError(true)}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">B</span>
+                </div>
+              )}
+            </div>
             <h2 className="text-2xl font-orbitron font-bold text-white mb-2">Admin Hub</h2>
             <p className="text-gray-400 text-sm">Secure Management Access</p>
           </div>
@@ -87,7 +101,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => {
         </div>
         
         <p className="text-center mt-8 text-gray-600 text-[10px] uppercase tracking-[0.3em]">
-          Bathudi Training Center &copy; {new Date().getFullYear()}
+          Bathudi Automotive Technical Center &copy; {new Date().getFullYear()}
         </p>
       </div>
     </div>
