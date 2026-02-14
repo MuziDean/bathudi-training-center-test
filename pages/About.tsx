@@ -9,7 +9,7 @@ const About: React.FC = () => {
             <div className="absolute -inset-4 bg-blue-600/20 blur-3xl rounded-full" />
             <div className="relative rounded-3xl overflow-hidden glass border border-white/10 p-2">
               <img 
-                src="/images/28.jpg" 
+                src="/images/28.jpeg" 
                 alt="About us" 
                 className="w-full h-full object-cover rounded-2xl"
                 onError={(e) => {
