@@ -320,14 +320,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
             Complete the form below to apply for your chosen course. All fields are required unless marked optional.
           </p>
           
-          {/* Test Connection Button */}
-          <button
-            type="button"
-            onClick={testAPIConnection}
-            className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-bold transition-colors"
-          >
-            🔌 Test Server Connection
-          </button>
+         
         </div>
 
         {/* Status Messages */}

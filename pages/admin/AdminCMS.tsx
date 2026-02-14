@@ -12,6 +12,7 @@ const AdminCMS: React.FC = () => {
     text: '',
     type: '',
   });
+  const [serverConnected, setServerConnected] = useState<boolean>(true);
 
   // ---------------- STATE ----------------
   const [newsPosts, setNewsPosts] = useState<any[]>([]);
@@ -47,6 +48,9 @@ const AdminCMS: React.FC = () => {
       console.log('Gallery response status:', gallery.status);
       console.log('Director response status:', director.status);
 
+      // Set server connection status
+      setServerConnected(news.ok || gallery.ok || director.ok);
+
       // Check if response is JSON
       if (news.ok) {
         const newsData = await news.json();
@@ -76,6 +80,7 @@ const AdminCMS: React.FC = () => {
       }
     } catch (err) {
       console.error('Fetch error:', err);
+      setServerConnected(false);
       showStatus('Failed to fetch data. Check if server is running.', 'error');
     }
   };
@@ -268,6 +273,41 @@ const AdminCMS: React.FC = () => {
     }
   };
 
+  // NEW: Handle delete current video
+  const handleDeleteVideo = async () => {
+    if (!directorMessage?.id) return;
+    
+    if (!confirm('Are you sure you want to delete the current video? This action cannot be undone.')) return;
+    
+    setIsUpdating(true);
+    try {
+      // Update director message to remove video
+      const formData = new FormData();
+      formData.append('quote', quote);
+      formData.append('is_active', 'true');
+      formData.append('video_url', ''); // Clear video URL
+      // No video_file means video is removed
+
+      const res = await fetch(`${API_BASE}/director-message/${directorMessage.id}/`, {
+        method: 'PATCH',
+        body: formData,
+      });
+
+      if (res.ok) {
+        showStatus('Video deleted successfully!', 'success');
+        setVideoUrl('');
+        setSelectedVideoFile(null);
+        fetchData();
+      } else {
+        throw new Error('Failed to delete video');
+      }
+    } catch (error) {
+      showStatus('Failed to delete video', 'error');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handleUpdateDirectorMessage = async () => {
     if (!quote) {
       showStatus('Please add a quote', 'error');
@@ -343,9 +383,17 @@ const AdminCMS: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Website Content Management</h1>
-          <p className="text-gray-400">Admin Panel - Manage News, Gallery, and Director's Video</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Website Content Management</h1>
+            <p className="text-gray-400">Admin Panel - Manage News, Gallery, and Director's Video</p>
+          </div>
+          
+          {/* SIMPLIFIED Server Status - Just green/red light with Connected/Disconnected */}
+          <div className="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg border border-white/5">
+            <span className={`h-3 w-3 rounded-full ${serverConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+            <span className="text-sm text-gray-300">{serverConnected ? 'Connected' : 'Disconnected'}</span>
+          </div>
         </div>
 
         {/* Status Message */}
@@ -354,19 +402,6 @@ const AdminCMS: React.FC = () => {
             {statusMessage.text}
           </div>
         )}
-
-        {/* Server Status Check */}
-        <div className="mb-6 p-4 bg-gray-800 rounded-lg">
-          <p className="text-gray-300">Server Status: 
-            <span className="ml-2 inline-flex items-center">
-              <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-              <span>Connected to {API_BASE}</span>
-            </span>
-          </p>
-          <p className="text-sm text-gray-400 mt-1">
-            Using environment: {import.meta.env.MODE} | API: {API_BASE}
-          </p>
-        </div>
 
         {/* Tabs */}
         <div className="flex space-x-2 mb-8 border-b border-gray-700">
@@ -614,11 +649,50 @@ const AdminCMS: React.FC = () => {
           </div>
         )}
 
-        {/* VIDEO TAB */}
+        {/* VIDEO TAB - With Current Video Display and Delete Option */}
         {activeTab === 'video' && (
           <div className="max-w-4xl mx-auto">
             <div className="bg-gray-800 rounded-xl p-8">
               <h2 className="text-2xl font-bold mb-8 text-white">Director's Message</h2>
+              
+              {/* Current Video Display */}
+              {directorMessage && (directorMessage.video_url || directorMessage.video_file) && (
+                <div className="mb-8 p-6 bg-gray-900 rounded-xl border border-gray-700">
+                  <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                    Current Video
+                  </h3>
+                  
+                  <div className="aspect-video rounded-lg overflow-hidden mb-4">
+                    {directorMessage.video_file ? (
+                      <video controls className="w-full h-full">
+                        <source src={directorMessage.video_file} type="video/mp4" />
+                      </video>
+                    ) : directorMessage.video_url ? (
+                      <iframe 
+                        src={directorMessage.video_url.replace('watch?v=', 'embed/')} 
+                        className="w-full h-full"
+                        allowFullScreen
+                        title="Current Director Video"
+                      ></iframe>
+                    ) : null}
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleDeleteVideo}
+                      disabled={isUpdating}
+                      className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg text-sm font-bold border border-red-500/20 transition-all flex items-center"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Delete Current Video
+                    </button>
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-8">
                 {/* Quote Section */}
                 <div>
@@ -635,7 +709,7 @@ const AdminCMS: React.FC = () => {
                 {/* Video Section */}
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium mb-3 text-gray-300">Video (Optional)</label>
+                    <label className="block text-sm font-medium mb-3 text-gray-300">Add New Video (Optional)</label>
                     <div className="flex space-x-4 mb-4">
                       <div className="flex items-center space-x-2">
                         <input
@@ -658,7 +732,7 @@ const AdminCMS: React.FC = () => {
                           onChange={() => setUseYouTube(false)}
                           className="text-blue-600"
                         />
-                        <label htmlFor="video-file" className="text-gray-300">Upload Video</label>
+                        <label htmlFor="video-file" className="text-gray-300">Upload New Video</label>
                       </div>
                     </div>
 
@@ -720,19 +794,6 @@ const AdminCMS: React.FC = () => {
                   >
                     {isUpdating ? 'Saving...' : 'Save Director Message'}
                   </button>
-                  
-                  {directorMessage && (
-                    <div className="mt-4 p-4 bg-gray-900 rounded-lg">
-                      <p className="text-sm text-gray-400 mb-2">Current Message:</p>
-                      <p className="text-gray-300 italic mb-2">"{directorMessage.quote}"</p>
-                      {directorMessage.video_url && (
-                        <p className="text-sm text-gray-400">Video: {directorMessage.video_url}</p>
-                      )}
-                      <p className="text-xs text-gray-500 mt-2">
-                        Last updated: {new Date(directorMessage.updated_at).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
