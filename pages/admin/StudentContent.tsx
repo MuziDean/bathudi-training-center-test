@@ -68,11 +68,7 @@ const StudentContent: React.FC<StudentContentProps> = ({ onNavigate }) => {
           </ul>
         </div>
         
-        {/* Estimated Timeline */}
-        <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 mb-8">
-          <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-          <span>Estimated completion: Q2 2024</span>
-        </div>
+        
         
         {/* Return Button */}
         <button
