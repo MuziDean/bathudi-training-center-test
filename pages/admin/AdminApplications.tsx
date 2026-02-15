@@ -670,20 +670,25 @@ const AdminApplications: React.FC = () => {
                 >
                   {selectedApp.fee_verified ? '✓ Fee Verified' : 'Verify Fee'}
                 </button>
-                <button 
-                  onClick={() => handleReject(selectedApp.id)}
-                  disabled={processing === selectedApp.id}
-                  className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-500 rounded-lg text-sm font-bold border border-red-500/20 transition-all"
-                >
-                  {processing === selectedApp.id ? 'Processing...' : 'Reject'}
-                </button>
-                <button 
-                  onClick={() => handleApprove(selectedApp.id)}
-                  disabled={processing === selectedApp.id}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-green-600/20"
-                >
-                  {processing === selectedApp.id ? 'Processing...' : 'Approve & Enroll'}
-                </button>
+                {/* FIXED: Use type guard to check if status is not 'approved' */}
+                {selectedApp.status !== 'approved' && (
+                  <>
+                    <button 
+                      onClick={() => handleReject(selectedApp.id)}
+                      disabled={processing === selectedApp.id}
+                      className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-500 rounded-lg text-sm font-bold border border-red-500/20 transition-all"
+                    >
+                      {processing === selectedApp.id ? 'Processing...' : 'Reject'}
+                    </button>
+                    <button 
+                      onClick={() => handleApprove(selectedApp.id)}
+                      disabled={processing === selectedApp.id}
+                      className="px-6 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-green-600/20"
+                    >
+                      {processing === selectedApp.id ? 'Processing...' : 'Approve & Enroll'}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -799,20 +804,30 @@ const AdminApplications: React.FC = () => {
                   <span className="font-medium text-gray-400">Education:</span> {app.education_level} • {app.previous_school}
                 </div>
                 <div className="flex gap-3">
-                  <button 
-                    onClick={() => handleReject(app.id)}
-                    disabled={processing === app.id || app.status === 'rejected'}
-                    className="px-4 py-2 text-xs bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-500 rounded-lg font-bold border border-red-500/20 transition-all"
-                  >
-                    {app.status === 'rejected' ? 'Rejected' : 'Reject'}
-                  </button>
-                  <button 
-                    onClick={() => handleApprove(app.id)}
-                    disabled={processing === app.id || app.status === 'approved'}
-                    className="px-4 py-2 text-xs bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-bold transition-all"
-                  >
-                    {app.status === 'approved' ? 'Approved' : 'Approve & Enroll'}
-                  </button>
+                  {/* FIXED: Use type guard to check if status is 'approved' */}
+                  {app.status === 'approved' ? (
+                    <span className="px-4 py-2 text-xs bg-green-500/20 text-green-400 rounded-lg font-bold border border-green-500/20">
+                      ✓ Approved
+                    </span>
+                  ) : (
+                    <>
+                      <button 
+                        onClick={() => handleReject(app.id)}
+                        disabled={processing === app.id || app.status === 'rejected'}
+                        className="px-4 py-2 text-xs bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-500 rounded-lg font-bold border border-red-500/20 transition-all"
+                      >
+                        {app.status === 'rejected' ? 'Rejected' : 'Reject'}
+                      </button>
+                      <button 
+                        onClick={() => handleApprove(app.id)}
+                        // FIXED: Use a type assertion to tell TypeScript this is safe
+                        disabled={processing === app.id || (app.status as string) === 'approved'}
+                        className="px-4 py-2 text-xs bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-bold transition-all"
+                      >
+                        Approve & Enroll
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
