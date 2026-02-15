@@ -165,19 +165,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentPage, onNavigate, on
           <span>Logout</span>
         </button>
 
-        {/* Quick Stats */}
-        <div className="pt-2 border-t border-white/5">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="text-center p-2 rounded bg-white/5">
-              <div className="text-xs text-gray-400">Online</div>
-              <div className="text-sm font-bold text-green-400">24</div>
-            </div>
-            <div className="text-center p-2 rounded bg-white/5">
-              <div className="text-xs text-gray-400">Alerts</div>
-              <div className="text-sm font-bold text-yellow-400">3</div>
-            </div>
-          </div>
-        </div>
+        {/* REMOVED: Quick Stats section with Online and Alerts */}
       </div>
 
       <style>{`
