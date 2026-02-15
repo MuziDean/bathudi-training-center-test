@@ -117,7 +117,6 @@ const AdminDashboard: React.FC = () => {
     <div className="space-y-10">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
-          {/* FIXED: Added logo to dashboard header */}
           <div className="relative w-12 h-12 rounded-xl overflow-hidden glass border border-white/10">
             {!logoError ? (
               <img 
@@ -231,14 +230,12 @@ const AdminDashboard: React.FC = () => {
             <div className="flex space-x-4">
               <div className="w-2 h-2 rounded-full bg-green-500 mt-2 shadow-lg shadow-green-500/50" />
               <div>
-                <p className="text-sm text-white font-medium">Monthly reports generated</p>
-                <p className="text-xs text-gray-500">Today, 08:00 AM</p>
+                <p className="text-sm text-white font-medium">System running normally</p>
+                <p className="text-xs text-gray-500">All systems operational</p>
               </div>
             </div>
           </div>
-          <button className="w-full mt-12 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl text-sm font-bold transition-all border border-white/5">
-            System Settings
-          </button>
+          {/* REMOVED: System Settings button */}
         </div>
       </div>
     </div>

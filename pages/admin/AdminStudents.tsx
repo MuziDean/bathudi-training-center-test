@@ -19,7 +19,6 @@ interface NewStudentForm {
   course_title: string;
   status: StudentStatus;
   fees_status: FeeStatus;
-  // Document checkboxes
   documents: {
     id: boolean;
     matric: boolean;
@@ -33,8 +32,11 @@ const AdminStudents: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [availableCourses, setAvailableCourses] = useState<any[]>([]);
   const [processing, setProcessing] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   
   // New student form state
   const [newStudent, setNewStudent] = useState<NewStudentForm>({
@@ -122,9 +124,8 @@ const AdminStudents: React.FC = () => {
     }));
   };
 
-  // Handle form submission
+  // Handle enroll student
   const handleEnrollStudent = async () => {
-    // Validate required fields
     if (!newStudent.name || !newStudent.surname || !newStudent.email || !newStudent.phone) {
       alert('Please fill in all required fields');
       return;
@@ -133,7 +134,6 @@ const AdminStudents: React.FC = () => {
     setProcessing(true);
 
     try {
-      // Prepare student data for API
       const studentData = {
         name: newStudent.name,
         surname: newStudent.surname,
@@ -148,7 +148,6 @@ const AdminStudents: React.FC = () => {
         course: newStudent.course_id,
         status: newStudent.status,
         fees_status: newStudent.fees_status,
-        // Document status
         documents_status: {
           id: newStudent.documents.id,
           matric: newStudent.documents.matric,
@@ -159,39 +158,15 @@ const AdminStudents: React.FC = () => {
 
       const response = await fetch(`${API_BASE_URL}/students/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(studentData),
       });
 
       if (response.ok) {
         alert(`✅ Student ${newStudent.name} ${newStudent.surname} enrolled successfully!`);
         setShowAddModal(false);
-        // Reset form
-        setNewStudent({
-          name: '',
-          surname: '',
-          email: '',
-          phone: '',
-          address: '',
-          id_number: '',
-          age: '',
-          country: 'South Africa',
-          education_level: '',
-          previous_school: '',
-          course_id: 1,
-          course_title: 'Engine Fitter',
-          status: StudentStatus.Active,
-          fees_status: FeeStatus.Pending,
-          documents: {
-            id: false,
-            matric: false,
-            pop: false,
-            additional: false
-          }
-        });
-        fetchStudents(); // Refresh student list
+        resetForm();
+        fetchStudents();
       } else {
         const error = await response.json();
         alert(`❌ Failed to enroll student: ${error.message || 'Unknown error'}`);
@@ -204,7 +179,83 @@ const AdminStudents: React.FC = () => {
     }
   };
 
-  // Filter students based on search term
+  // Handle edit student
+  const handleEditStudent = async () => {
+    if (!selectedStudent) return;
+    
+    setProcessing(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/${selectedStudent.id}/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(selectedStudent),
+      });
+
+      if (response.ok) {
+        alert(`✅ Student details updated successfully!`);
+        setShowEditModal(false);
+        setSelectedStudent(null);
+        fetchStudents();
+      } else {
+        const error = await response.json();
+        alert(`❌ Failed to update student: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating student:', error);
+      alert('❌ Network error. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // Handle delete student
+  const handleDeleteStudent = async (student: Student) => {
+    if (!confirm(`Are you sure you want to delete ${student.name} ${student.surname}? This action cannot be undone.`)) return;
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/${student.id}/`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        alert(`✅ Student deleted successfully!`);
+        fetchStudents();
+      } else {
+        alert(`❌ Failed to delete student`);
+      }
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      alert('❌ Network error. Please try again.');
+    }
+  };
+
+  // Reset form
+  const resetForm = () => {
+    setNewStudent({
+      name: '',
+      surname: '',
+      email: '',
+      phone: '',
+      address: '',
+      id_number: '',
+      age: '',
+      country: 'South Africa',
+      education_level: '',
+      previous_school: '',
+      course_id: 1,
+      course_title: 'Engine Fitter',
+      status: StudentStatus.Active,
+      fees_status: FeeStatus.Pending,
+      documents: {
+        id: false,
+        matric: false,
+        pop: false,
+        additional: false
+      }
+    });
+  };
+
+  // Filter students
   const filteredStudents = students.filter(student => {
     const searchLower = searchTerm.toLowerCase();
     const studentIdString = student.id?.toString() || '';
@@ -221,23 +272,16 @@ const AdminStudents: React.FC = () => {
     );
   });
 
-  // Get fee status with fallback
   const getFeeStatus = (student: Student): FeeStatus => {
     return student.fees_status || student.feesStatus || FeeStatus.Pending;
   };
 
-  // Get fee status color
   const getFeeStatusColor = (status: FeeStatus): string => {
     switch(status) {
-      case FeeStatus.Paid:
-        return 'bg-blue-500/20 text-blue-400';
-      case FeeStatus.Partial:
-        return 'bg-yellow-500/20 text-yellow-400';
-      case FeeStatus.Outstanding:
-        return 'bg-red-500/20 text-red-400';
-      case FeeStatus.Pending:
-      default:
-        return 'bg-gray-500/20 text-gray-400';
+      case FeeStatus.Paid: return 'bg-blue-500/20 text-blue-400';
+      case FeeStatus.Partial: return 'bg-yellow-500/20 text-yellow-400';
+      case FeeStatus.Outstanding: return 'bg-red-500/20 text-red-400';
+      case FeeStatus.Pending: default: return 'bg-gray-500/20 text-gray-400';
     }
   };
 
@@ -254,6 +298,113 @@ const AdminStudents: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* View Modal */}
+      {showViewModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="glass p-8 rounded-3xl border border-white/5 max-w-2xl w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">Student Details</h2>
+              <button onClick={() => { setShowViewModal(false); setSelectedStudent(null); }} 
+                className="text-gray-400 hover:text-white text-2xl">×</button>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div><p className="text-gray-400">Name</p><p className="text-white font-medium">{selectedStudent.name} {selectedStudent.surname}</p></div>
+                <div><p className="text-gray-400">Student ID</p><p className="text-white font-medium">{selectedStudent.student_id || selectedStudent.id}</p></div>
+                <div><p className="text-gray-400">Email</p><p className="text-white font-medium">{selectedStudent.email}</p></div>
+                <div><p className="text-gray-400">Phone</p><p className="text-white font-medium">{selectedStudent.phone}</p></div>
+                <div><p className="text-gray-400">Course</p><p className="text-white font-medium">{selectedStudent.course_title}</p></div>
+                <div><p className="text-gray-400">Status</p><p className={`font-medium ${selectedStudent.status === StudentStatus.Active ? 'text-green-400' : 'text-red-400'}`}>{selectedStudent.status}</p></div>
+                <div><p className="text-gray-400">Fee Status</p><p className={`font-medium ${getFeeStatusColor(getFeeStatus(selectedStudent))}`}>{getFeeStatus(selectedStudent)}</p></div>
+                <div><p className="text-gray-400">Address</p><p className="text-white font-medium">{selectedStudent.address || 'N/A'}</p></div>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button onClick={() => { setShowViewModal(false); setSelectedStudent(null); }} 
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="glass p-8 rounded-3xl border border-white/5 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">Edit Student Details</h2>
+              <button onClick={() => { setShowEditModal(false); setSelectedStudent(null); }} 
+                className="text-gray-400 hover:text-white text-2xl">×</button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">First Name</label>
+                  <input type="text" value={selectedStudent.name} 
+                    onChange={(e) => setSelectedStudent({...selectedStudent, name: e.target.value})}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Last Name</label>
+                  <input type="text" value={selectedStudent.surname} 
+                    onChange={(e) => setSelectedStudent({...selectedStudent, surname: e.target.value})}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Email</label>
+                  <input type="email" value={selectedStudent.email} 
+                    onChange={(e) => setSelectedStudent({...selectedStudent, email: e.target.value})}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Phone</label>
+                  <input type="text" value={selectedStudent.phone} 
+                    onChange={(e) => setSelectedStudent({...selectedStudent, phone: e.target.value})}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Address</label>
+                  <input type="text" value={selectedStudent.address || ''} 
+                    onChange={(e) => setSelectedStudent({...selectedStudent, address: e.target.value})}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Fee Status</label>
+                  <select value={selectedStudent.fees_status} 
+                    onChange={(e) => setSelectedStudent({...selectedStudent, fees_status: e.target.value as FeeStatus})}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+                    <option value={FeeStatus.Paid}>Paid</option>
+                    <option value={FeeStatus.Partial}>Partial</option>
+                    <option value={FeeStatus.Outstanding}>Outstanding</option>
+                    <option value={FeeStatus.Pending}>Pending</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Status</label>
+                  <select value={selectedStudent.status} 
+                    onChange={(e) => setSelectedStudent({...selectedStudent, status: e.target.value as StudentStatus})}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+                    <option value={StudentStatus.Active}>Active</option>
+                    <option value={StudentStatus.Inactive}>Inactive</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-4 mt-6">
+                <button onClick={() => { setShowEditModal(false); setSelectedStudent(null); }} 
+                  className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg">Cancel</button>
+                <button onClick={handleEditStudent} disabled={processing}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50">
+                  {processing ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rest of your component remains the same... */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-orbitron font-bold text-white mb-2">Student Registry</h1>
@@ -271,273 +422,6 @@ const AdminStudents: React.FC = () => {
           </button>
         </div>
       </header>
-
-      {/* Add Student Modal - FIXED: Increased z-index and improved dropdown styling */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-          <div className="glass p-6 md:p-8 rounded-3xl border border-white/5 max-w-4xl w-full max-h-[90vh] overflow-y-auto" style={{ zIndex: 10000 }}>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">📝 Enroll New Student</h2>
-              <button 
-                onClick={() => setShowAddModal(false)}
-                className="text-gray-400 hover:text-white text-2xl transition-colors"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Personal Information */}
-              <div className="p-6 rounded-xl bg-slate-900/50 border border-white/5">
-                <h3 className="text-lg font-bold text-white mb-4">Personal Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">First Name *</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={newStudent.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
-                      placeholder="Enter first name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Last Name *</label>
-                    <input
-                      type="text"
-                      name="surname"
-                      value={newStudent.surname}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
-                      placeholder="Enter last name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Email *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={newStudent.email}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
-                      placeholder="student@example.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Phone *</label>
-                    <input
-                      type="text"
-                      name="phone"
-                      value={newStudent.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
-                      placeholder="0712345678"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">ID/Passport Number</label>
-                    <input
-                      type="text"
-                      name="id_number"
-                      value={newStudent.id_number}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
-                      placeholder="Enter ID number"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Age</label>
-                    <input
-                      type="number"
-                      name="age"
-                      value={newStudent.age}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
-                      placeholder="Age"
-                      min="16"
-                      max="65"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Country</label>
-                    <select
-                      name="country"
-                      value={newStudent.country}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white appearance-none cursor-pointer"
-                      style={{ color: 'white' }}
-                    >
-                      <option value="South Africa" className="bg-gray-800 text-white">South Africa</option>
-                      <option value="Lesotho" className="bg-gray-800 text-white">Lesotho</option>
-                      <option value="Botswana" className="bg-gray-800 text-white">Botswana</option>
-                      <option value="Eswatini" className="bg-gray-800 text-white">Eswatini</option>
-                      <option value="Zimbabwe" className="bg-gray-800 text-white">Zimbabwe</option>
-                      <option value="Mozambique" className="bg-gray-800 text-white">Mozambique</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm text-gray-400 mb-1">Address</label>
-                    <textarea
-                      name="address"
-                      value={newStudent.address}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
-                      placeholder="Physical address"
-                      rows={2}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Education Information - FIXED: Dropdowns now visible with proper colors */}
-              <div className="p-6 rounded-xl bg-slate-900/50 border border-white/5">
-                <h3 className="text-lg font-bold text-white mb-4">Education & Course</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Education Level</label>
-                    <select
-                      name="education_level"
-                      value={newStudent.education_level}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white appearance-none cursor-pointer"
-                      style={{ color: 'white' }}
-                    >
-                      <option value="" className="bg-gray-800 text-white">Select Education Level</option>
-                      <option value="Grade 10" className="bg-gray-800 text-white">Grade 10</option>
-                      <option value="Grade 11" className="bg-gray-800 text-white">Grade 11</option>
-                      <option value="Grade 12 (Matric)" className="bg-gray-800 text-white">Grade 12 (Matric)</option>
-                      <option value="N3" className="bg-gray-800 text-white">N3</option>
-                      <option value="N4" className="bg-gray-800 text-white">N4</option>
-                      <option value="Certificate" className="bg-gray-800 text-white">Certificate</option>
-                      <option value="Diploma" className="bg-gray-800 text-white">Diploma</option>
-                      <option value="Degree" className="bg-gray-800 text-white">Degree</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Previous School</label>
-                    <input
-                      type="text"
-                      name="previous_school"
-                      value={newStudent.previous_school}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500"
-                      placeholder="Previous school/institution"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm text-gray-400 mb-1">Course *</label>
-                    <select
-                      name="course_id"
-                      value={newStudent.course_id}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white appearance-none cursor-pointer"
-                      style={{ color: 'white' }}
-                    >
-                      {availableCourses.map(course => (
-                        <option key={course.id} value={course.id} className="bg-gray-800 text-white">
-                          {course.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Documents & Status */}
-              <div className="p-6 rounded-xl bg-slate-900/50 border border-white/5">
-                <h3 className="text-lg font-bold text-white mb-4">Documents & Status</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="text-sm text-gray-400 mb-3">Document Availability (Check if available)</h4>
-                    <div className="space-y-3">
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={newStudent.documents.id}
-                          onChange={() => handleDocumentChange('id')}
-                          className="w-5 h-5 rounded bg-gray-800 border-gray-600 text-blue-600"
-                        />
-                        <span className="text-white">ID Document Available</span>
-                      </label>
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={newStudent.documents.matric}
-                          onChange={() => handleDocumentChange('matric')}
-                          className="w-5 h-5 rounded bg-gray-800 border-gray-600 text-blue-600"
-                        />
-                        <span className="text-white">Matric Certificate Available</span>
-                      </label>
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={newStudent.documents.pop}
-                          onChange={() => handleDocumentChange('pop')}
-                          className="w-5 h-5 rounded bg-gray-800 border-gray-600 text-blue-600"
-                        />
-                        <span className="text-white">Proof of Payment Available (R661.25)</span>
-                      </label>
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={newStudent.documents.additional}
-                          onChange={() => handleDocumentChange('additional')}
-                          className="w-5 h-5 rounded bg-gray-800 border-gray-600 text-blue-600"
-                        />
-                        <span className="text-white">Additional Documents Available</span>
-                      </label>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm text-gray-400 mb-3">Status</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-1">Fee Status</label>
-                        <select
-                          value={newStudent.fees_status}
-                          onChange={(e) => setNewStudent({...newStudent, fees_status: e.target.value as FeeStatus})}
-                          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white appearance-none cursor-pointer"
-                          style={{ color: 'white' }}
-                        >
-                          <option value={FeeStatus.Pending} className="bg-gray-800 text-white">Pending</option>
-                          <option value={FeeStatus.Paid} className="bg-gray-800 text-white">Paid</option>
-                          <option value={FeeStatus.Partial} className="bg-gray-800 text-white">Partial</option>
-                          <option value={FeeStatus.Outstanding} className="bg-gray-800 text-white">Outstanding</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-4 pt-6 border-t border-white/5">
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-bold transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleEnrollStudent}
-                  disabled={processing}
-                  className="px-8 py-3 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-bold transition-all shadow-lg shadow-green-600/20 flex items-center"
-                >
-                  {processing ? (
-                    <>
-                      <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></span>
-                      Enrolling...
-                    </>
-                  ) : (
-                    '✓ Enroll Student'
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Filter Bar */}
       <div className="glass p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center border border-white/5">
@@ -619,21 +503,33 @@ const AdminStudents: React.FC = () => {
                           <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase mb-1 ${getFeeStatusColor(feeStatus)}`}>
                             {feeStatus}
                           </span>
-                          <button className="text-[9px] text-gray-500 hover:text-white flex items-center font-bold uppercase tracking-tighter">
-                            <span className="mr-1">📁</span> View Records
-                          </button>
                         </div>
                       </td>
                       <td className="px-6 py-5 text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <button className="p-2 glass hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="View Profile">
+                          {/* Eye - View Details */}
+                          <button 
+                            onClick={() => { setSelectedStudent(student); setShowViewModal(true); }}
+                            className="p-2 glass hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" 
+                            title="View Details"
+                          >
                             👁️
                           </button>
-                          <button className="p-2 glass hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="Edit Details">
+                          {/* Pen - Edit Details */}
+                          <button 
+                            onClick={() => { setSelectedStudent(student); setShowEditModal(true); }}
+                            className="p-2 glass hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" 
+                            title="Edit Details"
+                          >
                             ✏️
                           </button>
-                          <button className="p-2 glass hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-colors" title="Deactivate">
-                            🚫
+                          {/* Dustbin - Delete Student */}
+                          <button 
+                            onClick={() => handleDeleteStudent(student)}
+                            className="p-2 glass hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-colors" 
+                            title="Delete Student"
+                          >
+                            🗑️
                           </button>
                         </div>
                       </td>
