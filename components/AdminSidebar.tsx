@@ -15,16 +15,16 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentPage, onNavigate, on
     { id: Page.AdminApplications, label: 'Applications', icon: '📝' },
   ];
 
-  // Content Management items
+  // Content Management items - FIXED: Using Page.StudentContent from types
   const contentNavItems = [
     { id: Page.AdminCMS, label: 'Website Content', icon: '🌐' },
-    { id: 'student-announcements' as Page, label: 'Student Content', icon: '📢', badge: 'New' },
+    { id: Page.StudentContent, label: 'Student Content', icon: '📢', badge: 'New' },
   ];
 
   // Settings items
   const settingsNavItems = [
-    { id: 'student-notifications' as Page, label: 'Push Notifications', icon: '🔔' },
-    { id: 'broadcast-messages' as Page, label: 'Broadcast Messages', icon: '📣' },
+    { id: Page.StudentNotifications, label: 'Push Notifications', icon: '🔔' },
+    { id: Page.BroadcastMessages, label: 'Broadcast Messages', icon: '📣' },
   ];
 
   return (
@@ -33,7 +33,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentPage, onNavigate, on
       <div className="p-6 border-b border-white/5">
         <div className="flex items-center space-x-3">
           <img 
-            src="bathudi logo.png" 
+            src="/images/bathudi logo.png" 
             alt="Logo" 
             className="h-10 w-auto"
             onError={(e) => {
@@ -164,8 +164,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentPage, onNavigate, on
           </svg>
           <span>Logout</span>
         </button>
-
-        {/* REMOVED: Quick Stats section with Online and Alerts */}
       </div>
 
       <style>{`
