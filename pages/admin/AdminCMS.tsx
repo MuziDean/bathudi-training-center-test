@@ -273,7 +273,7 @@ const AdminCMS: React.FC = () => {
     }
   };
 
-  // NEW: Handle delete current video
+  // Handle delete current video
   const handleDeleteVideo = async () => {
     if (!directorMessage?.id) return;
     
@@ -466,13 +466,13 @@ const AdminCMS: React.FC = () => {
                   />
                 </div>
                 
-                {/* Image Upload Section */}
+                {/* Image Upload Section - FIXED: Added .jpeg support */}
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-300">News Image (Optional)</label>
                   <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center">
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                       onChange={handleNewsImageSelect}
                       className="hidden"
                       id="news-image-upload"
@@ -500,7 +500,7 @@ const AdminCMS: React.FC = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                           <p className="text-gray-300 mb-2">Click to upload an image for this news</p>
-                          <p className="text-sm text-gray-400">Supports JPG, PNG, WebP</p>
+                          <p className="text-sm text-gray-400">Supports JPG, JPEG, PNG, WebP</p>
                           <button
                             type="button"
                             onClick={() => document.getElementById('news-image-upload')?.click()}
@@ -563,7 +563,7 @@ const AdminCMS: React.FC = () => {
           </div>
         )}
 
-        {/* GALLERY TAB */}
+        {/* GALLERY TAB - FIXED: Added .jpeg support */}
         {activeTab === 'gallery' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Upload Images */}
@@ -574,7 +574,7 @@ const AdminCMS: React.FC = () => {
                   <input
                     type="file"
                     multiple
-                    accept="image/*"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                     onChange={handleGallerySelect}
                     className="hidden"
                     id="gallery-upload"
@@ -587,7 +587,7 @@ const AdminCMS: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <p className="text-gray-300 mb-2">Click to select images</p>
-                    <p className="text-sm text-gray-400">Supports JPG, PNG, WebP</p>
+                    <p className="text-sm text-gray-400">Supports JPG, JPEG, PNG, WebP, GIF</p>
                   </label>
                   {selectedFiles.length > 0 && (
                     <div className="mt-6">
@@ -649,7 +649,7 @@ const AdminCMS: React.FC = () => {
           </div>
         )}
 
-        {/* VIDEO TAB - With Current Video Display and Delete Option */}
+        {/* VIDEO TAB */}
         {activeTab === 'video' && (
           <div className="max-w-4xl mx-auto">
             <div className="bg-gray-800 rounded-xl p-8">
