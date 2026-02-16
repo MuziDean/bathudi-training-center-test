@@ -13,7 +13,6 @@ interface HomeProps {
   onViewNews: (id: string) => void;
 }
 
-// FIXED: Use environment variable for API
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
@@ -25,7 +24,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
     },
     {
       id: 2,
-      text: "LEARN TODAY LEAD TOMORRROW",
+      text: "LEARN TODAY LEAD TOMORROW",
       highlightWord: ["LEARN", "LEAD"]
     },
     {
@@ -133,7 +132,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section */}
+      {/* Hero Section - Mobile optimized */}
       <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
         {bgImages.map((img, idx) => (
           <div key={img} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === bgImageIdx ? 'opacity-100' : 'opacity-0'}`}>
@@ -146,23 +145,23 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
           </div>
         ))}
 
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <div className="inline-block px-4 py-1.5 mb-6 glass rounded-full border border-blue-500/30">
-            <span className="text-blue-400 font-bold tracking-widest text-xs uppercase">Skills Development Institute</span>
+        <div className="relative z-10 text-center px-3 sm:px-4 max-w-5xl mx-auto">
+          <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 mb-4 sm:mb-6 glass rounded-full border border-blue-500/30">
+            <span className="text-[10px] sm:text-xs text-blue-400 font-bold tracking-widest uppercase">Skills Development Institute</span>
           </div>
           
-          <h1 className="font-orbitron text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-fadeIn">
+          <h1 className="font-orbitron text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 leading-tight animate-fadeIn px-2">
             {renderSlogan(activeSlogan)}
           </h1>
           
-          <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 font-light">
+          <p className="text-gray-300 text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto mb-6 sm:mb-8 md:mb-10 font-light px-4">
             Empowering South African youth with world-class automotive training. Join the masters of mechanics today.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
             <button 
               onClick={() => onNavigate(Page.Apply)} 
-              className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg shadow-xl transition-all
+              className="w-full sm:w-auto min-w-[200px] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg shadow-xl transition-all
                 bg-red-900/40 backdrop-blur-md border border-red-500/30
                 hover:bg-red-800/50 hover:border-red-400/50 hover:shadow-red-500/20
                 text-white"
@@ -170,43 +169,48 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
               Start Application
             </button>
             
-            <button onClick={() => onNavigate(Page.Courses)} className="w-full sm:w-auto px-8 py-4 glass text-white rounded-full font-bold text-lg border border-white/20 hover:bg-white/10 transition-all">
+            <button 
+              onClick={() => onNavigate(Page.Courses)} 
+              className="w-full sm:w-auto min-w-[200px] px-6 sm:px-8 py-3 sm:py-4 glass text-white rounded-full font-bold text-base sm:text-lg border border-white/20 hover:bg-white/10 transition-all"
+            >
               View Courses
             </button>
           </div>
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="py-24 bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h3 className="text-3xl md:text-5xl font-orbitron font-bold text-white mb-16">Our Values</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+      {/* Values Section - Mobile optimized */}
+      <section className="py-16 sm:py-20 md:py-24 bg-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-orbitron font-bold text-white mb-12 sm:mb-16">Our Values</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 text-left">
             {VALUES.map((val) => (
               <div 
                 key={val.title} 
-                className="glass p-8 rounded-2xl border border-white/5 transition-all group cursor-pointer
+                className="glass p-6 sm:p-8 rounded-2xl border border-white/5 transition-all group cursor-pointer
                   hover:border-red-500/30 hover:bg-red-950/10 hover:shadow-lg hover:shadow-red-900/10"
               >
-                <div className="text-4xl mb-6 transform group-hover:scale-125 transition-transform">{val.icon}</div>
-                <h4 className="text-xl font-bold text-white mb-4 group-hover:text-red-300 transition-colors">{val.title}</h4>
-                <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">{val.description}</p>
+                <div className="text-3xl sm:text-4xl mb-4 sm:mb-6 transform group-hover:scale-125 transition-transform">{val.icon}</div>
+                <h4 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 group-hover:text-red-300 transition-colors">{val.title}</h4>
+                <p className="text-sm sm:text-base text-gray-400 group-hover:text-gray-300 transition-colors">{val.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Campus Updates & Video */}
-      <section className="py-24 bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4">
-          <h3 className="text-3xl md:text-5xl font-orbitron font-bold text-white mb-16 text-center">Campus Updates & Messages</h3>
+      {/* Campus Updates & Video - Mobile optimized */}
+      <section className="py-16 sm:py-20 md:py-24 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-orbitron font-bold text-white mb-12 sm:mb-16 text-center">Campus Updates & Messages</h3>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Campus Updates */}
             <div className="lg:col-span-2">
-              <h3 className="text-2xl font-orbitron font-bold text-white mb-8 flex items-center"><span className="mr-3">📰</span> Latest News</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <h3 className="text-xl sm:text-2xl font-orbitron font-bold text-white mb-6 sm:mb-8 flex items-center">
+                <span className="mr-3">📰</span> Latest News
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {newsPosts.map(news => (
                   <div 
                     key={news.id} 
@@ -214,38 +218,35 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
                       hover:border-red-500/30 hover:bg-gradient-to-br hover:from-red-950/20 hover:to-transparent hover:transform hover:-translate-y-1"
                     onClick={() => onViewNews(news.id.toString())}
                   >
-                    {/* News Image with red overlay on hover */}
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-40 sm:h-48 overflow-hidden">
                       <img 
                         src={news.image_url} 
                         alt={news.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                      {/* Red overlay on hover */}
                       <div className="absolute inset-0 bg-red-900/0 group-hover:bg-red-900/20 transition-all duration-300" />
                     </div>
                     
-                    {/* News Content */}
-                    <div className="p-6">
-                      <h4 className="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-red-300 transition-colors">
+                    <div className="p-4 sm:p-6">
+                      <h4 className="text-base sm:text-lg font-bold text-white mb-2 sm:mb-3 line-clamp-2 group-hover:text-red-300 transition-colors">
                         {news.title}
                       </h4>
-                      <p className="text-gray-400 text-sm mb-4 line-clamp-3 group-hover:text-gray-300 transition-colors">
+                      <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4 line-clamp-3 group-hover:text-gray-300 transition-colors">
                         {news.preview_text || news.content.substring(0, 150)}...
                       </p>
                       
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500 group-hover:text-gray-400 transition-colors">
+                        <span className="text-[10px] sm:text-xs text-gray-500 group-hover:text-gray-400 transition-colors">
                           {new Date(news.created_at).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
                           })}
                         </span>
-                        <span className="text-xs px-3 py-1 rounded-full flex items-center transition-all
+                        <span className="text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-full flex items-center transition-all
                           bg-blue-500/20 text-blue-400 group-hover:bg-red-500/20 group-hover:text-red-300">
                           Read More
-                          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
                         </span>
@@ -265,11 +266,12 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
               </div>
             </div>
 
-            {/* Director's Message Sidebar */}
+            {/* Director's Message Sidebar - Mobile optimized */}
             <div>
-              <h3 className="text-2xl font-orbitron font-bold text-white mb-8 flex items-center"><span className="mr-3">🎥</span> Director's Message</h3>
+              <h3 className="text-xl sm:text-2xl font-orbitron font-bold text-white mb-6 sm:mb-8 flex items-center">
+                <span className="mr-3">🎥</span> Director's Message
+              </h3>
               <div className="space-y-6">
-                {/* Video Player */}
                 <div className="aspect-video rounded-2xl overflow-hidden glass border border-white/10
                   hover:border-red-500/30 transition-all">
                   {directorData ? (
@@ -303,20 +305,19 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onViewNews }) => {
                   )}
                 </div>
                 
-                {/* Quote */}
-                <blockquote className="glass p-6 rounded-2xl border border-white/5
+                <blockquote className="glass p-4 sm:p-6 rounded-2xl border border-white/5
                   hover:border-red-500/30 hover:bg-red-950/10 transition-all">
-                  <div className="text-4xl text-blue-400 mb-4">"</div>
-                  <p className="text-gray-300 italic mb-4">
+                  <div className="text-3xl sm:text-4xl text-blue-400 mb-3 sm:mb-4">"</div>
+                  <p className="text-sm sm:text-base text-gray-300 italic mb-3 sm:mb-4">
                     {directorData?.quote || "Join us in shaping the future of South African automotive excellence through quality education and hands-on training."}
                   </p>
-                  <div className="flex items-center pt-4 border-t border-white/10">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center mr-3">
-                      <span className="text-white font-bold">D</span>
+                  <div className="flex items-center pt-3 sm:pt-4 border-t border-white/10">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center mr-3 flex-shrink-0">
+                      <span className="text-white font-bold text-xs sm:text-sm">D</span>
                     </div>
                     <div>
-                      <p className="text-white font-bold">Director</p>
-                      <p className="text-gray-400 text-sm">Bathudi Training Center</p>
+                      <p className="text-sm sm:text-base text-white font-bold">Director</p>
+                      <p className="text-xs sm:text-sm text-gray-400">Bathudi Training Center</p>
                     </div>
                   </div>
                 </blockquote>

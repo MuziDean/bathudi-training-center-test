@@ -35,7 +35,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     additional_doc_2: null as File | null,
   });
 
-  // Fetch available courses from backend
   useEffect(() => {
     fetchCourses();
   }, []);
@@ -54,7 +53,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Handle text input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -63,7 +61,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }));
   };
 
-  // Handle file input changes
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files: fileList } = e.target;
     if (fileList && fileList[0]) {
@@ -74,7 +71,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Remove uploaded file
   const handleRemoveFile = (fileType: keyof typeof files) => {
     setFiles(prev => ({
       ...prev,
@@ -87,8 +83,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Format file name to prevent overflow
-  const formatFileName = (fileName: string, maxLength: number = 25): string => {
+  const formatFileName = (fileName: string, maxLength: number = 20): string => {
     if (fileName.length <= maxLength) {
       return fileName;
     }
@@ -104,7 +99,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     return truncatedName + extension;
   };
 
-  // Format file size
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -113,7 +107,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
-  // Validate form
   const validateForm = () => {
     const requiredFields = ['name', 'surname', 'age', 'mobile', 'email', 'id_number', 'address', 'education_level', 'previous_school', 'course'];
     for (const field of requiredFields) {
@@ -161,7 +154,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     return true;
   };
 
-  // Submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -270,7 +262,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Test API connection function - FIXED: Use API_BASE_URL
   const testAPIConnection = async () => {
     try {
       alert('🔌 Testing connection to server...');
@@ -287,57 +278,51 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Go back to courses
   const handleBackToCourses = () => {
     onNavigate(Page.Courses);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-gray-900 pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-gray-900 pt-20 sm:pt-24 pb-12 sm:pb-16 px-3 sm:px-4">
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
         <button
           onClick={handleBackToCourses}
-          className="flex items-center text-gray-400 hover:text-white mb-8 transition-colors group"
+          className="flex items-center text-gray-400 hover:text-white mb-6 sm:mb-8 transition-colors group text-sm sm:text-base"
         >
-          <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to All Courses
         </button>
 
         {/* Header with Registration Fee Notice */}
-        <div className="mb-10 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 font-orbitron bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
+        <div className="mb-8 sm:mb-10 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 font-orbitron bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
             Apply for Admission
           </h2>
-          <div className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-full mb-6">
-            <span className="text-amber-400 font-bold text-lg">📢 Registration Fee: R661.25</span>
-            <span className="mx-3 text-gray-400">•</span>
-            <span className="text-gray-300">Required for all applications</span>
+          <div className="inline-flex flex-col sm:flex-row items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-full mb-4 sm:mb-6">
+            <span className="text-amber-400 font-bold text-sm sm:text-base">📢 Registration Fee: R661.25</span>
+            <span className="hidden sm:inline mx-3 text-gray-400">•</span>
+            <span className="text-gray-300 text-xs sm:text-sm">Required for all applications</span>
           </div>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto">
             Complete the form below to apply for your chosen course. All fields are required unless marked optional.
           </p>
-          
-         
         </div>
 
         {/* Status Messages */}
         {submitStatus === 'success' && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl">
+          <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl">
             <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mr-4">
-                <span className="text-2xl text-green-400">✓</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500/20 flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span className="text-xl sm:text-2xl text-green-400">✓</span>
               </div>
               <div>
-                <p className="text-green-400 font-bold text-lg">Application Submitted Successfully!</p>
-                <p className="text-green-400/80 text-sm mt-1">
+                <p className="text-green-400 font-bold text-base sm:text-lg">Application Submitted Successfully!</p>
+                <p className="text-green-400/80 text-xs sm:text-sm mt-1">
                   Your application has been received and will appear in the admin dashboard for review.
                   We'll contact you within 3-5 working days.
-                </p>
-                <p className="text-green-400/60 text-xs mt-2">
-                  Application ID will be provided once processed.
                 </p>
               </div>
             </div>
@@ -345,31 +330,31 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
         )}
         
         {submitStatus === 'error' && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-500/20 rounded-2xl">
+          <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-500/20 rounded-2xl">
             <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mr-4">
-                <span className="text-2xl text-red-400">✗</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-500/20 flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span className="text-xl sm:text-2xl text-red-400">✗</span>
               </div>
               <div>
-                <p className="text-red-400 font-bold text-lg">Submission Error</p>
-                <p className="text-red-400/80 text-sm mt-1">{errorMessage}</p>
+                <p className="text-red-400 font-bold text-base sm:text-lg">Submission Error</p>
+                <p className="text-red-400/80 text-xs sm:text-sm mt-1">{errorMessage}</p>
               </div>
             </div>
           </div>
         )}
         
-        <div className="glass p-6 md:p-8 rounded-3xl border border-white/5 bg-gradient-to-br from-slate-900/50 to-gray-900/50 backdrop-blur-sm">
-          <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="glass p-4 sm:p-6 md:p-8 rounded-3xl border border-white/5 bg-gradient-to-br from-slate-900/50 to-gray-900/50 backdrop-blur-sm">
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
             {/* Section 1: Personal Information */}
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-                <span className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center mr-3">1</span>
+            <div className="p-4 sm:p-6 rounded-2xl bg-white/5 border border-white/10">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+                <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-500/20 flex items-center justify-center mr-2 sm:mr-3 text-sm sm:text-base">1</span>
                 Personal Information
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     First Name *
                   </label>
                   <input
@@ -377,14 +362,14 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
                     placeholder="Enter your first name"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Last Name *
                   </label>
                   <input
@@ -392,14 +377,14 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     name="surname"
                     value={formData.surname}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
                     placeholder="Enter your last name"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Age *
                   </label>
                   <input
@@ -407,7 +392,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     name="age"
                     value={formData.age}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
                     placeholder="Enter your age"
                     min="16"
                     max="65"
@@ -416,7 +401,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     ID/Passport Number *
                   </label>
                   <input
@@ -424,21 +409,21 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     name="id_number"
                     value={formData.id_number}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
                     placeholder="Enter ID or passport number"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Country *
                   </label>
                   <select
                     name="country"
                     value={formData.country}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer text-sm sm:text-base"
                     style={{ color: 'white' }}
                     required
                   >
@@ -456,7 +441,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Mobile Number *
                   </label>
                   <input
@@ -464,14 +449,14 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     name="mobile"
                     value={formData.mobile}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                    placeholder="083 123 4567 or +27831234567"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                    placeholder="083 123 4567"
                     required
                   />
                 </div>
                 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Email Address *
                   </label>
                   <input
@@ -479,14 +464,14 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
                     placeholder="your.email@example.com"
                     required
                   />
                 </div>
                 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Physical Address *
                   </label>
                   <textarea
@@ -494,7 +479,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     value={formData.address}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none text-sm sm:text-base"
                     placeholder="Enter your full physical address"
                     required
                   />
@@ -502,23 +487,23 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Section 2: Education Information - FIXED: Dropdown colors */}
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-                <span className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center mr-3">2</span>
+            {/* Section 2: Education Information */}
+            <div className="p-4 sm:p-6 rounded-2xl bg-white/5 border border-white/10">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+                <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-green-500/20 flex items-center justify-center mr-2 sm:mr-3 text-sm sm:text-base">2</span>
                 Education Information
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Highest Education Level *
                   </label>
                   <select
                     name="education_level"
                     value={formData.education_level}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer text-sm sm:text-base"
                     style={{ color: 'white' }}
                     required
                   >
@@ -538,7 +523,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Previous School/Institution *
                   </label>
                   <input
@@ -546,101 +531,97 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     name="previous_school"
                     value={formData.previous_school}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                    placeholder="Name of your previous school/institution"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                    placeholder="Name of your previous school"
                     required
                   />
                 </div>
                 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                     Choose Course *
                   </label>
                   <select
                     name="course"
                     value={formData.course}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none cursor-pointer text-sm sm:text-base"
                     style={{ color: 'white' }}
                     required
                   >
                     <option value="" style={{ backgroundColor: '#1f2937', color: 'white' }}>Select a course</option>
                     <option value="automotive_engine_repairer" style={{ backgroundColor: '#1f2937', color: 'white' }}>
-                      Occupational Certificate: Automotive Engine Repairer
+                      Automotive Engine Repairer
                     </option>
                     <option value="automotive_clutch_brake_repairer" style={{ backgroundColor: '#1f2937', color: 'white' }}>
-                      Occupational Certificate: Automotive Clutch and Brake Repairer
+                      Clutch & Brake Repairer
                     </option>
                     <option value="automotive_suspension_fitter" style={{ backgroundColor: '#1f2937', color: 'white' }}>
-                      Occupational Certificate: Automotive Suspension Fitter
+                      Suspension Fitter
                     </option>
                     <option value="automotive_workshop_assistant" style={{ backgroundColor: '#1f2937', color: 'white' }}>
-                      Occupational Certificate: Automotive Workshop Assistant
+                      Workshop Assistant
                     </option>
-                    {/* Dynamic courses from backend */}
                     {availableCourses.map(course => (
                       <option key={course.id} value={course.id} style={{ backgroundColor: '#1f2937', color: 'white' }}>
                         {course.title}
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Selected course ID will be sent as: <code className="bg-black/30 px-1 py-0.5 rounded">{formData.course || 'none'}</code>
-                  </p>
                 </div>
               </div>
             </div>
 
             {/* Section 3: Documents Upload */}
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-                <span className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center mr-3">3</span>
+            <div className="p-4 sm:p-6 rounded-2xl bg-white/5 border border-white/10">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+                <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-amber-500/20 flex items-center justify-center mr-2 sm:mr-3 text-sm sm:text-base">3</span>
                 Required Documents
-                <span className="ml-4 text-sm font-normal text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full">
-                  R661.25 Registration Fee Required
+                <span className="ml-2 sm:ml-4 text-[10px] sm:text-xs font-normal text-amber-400 bg-amber-500/10 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
+                  R661.25 Fee
                 </span>
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* ID Document */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-300">
+                <div className="space-y-2 sm:space-y-3">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     ID/Passport Document *
                   </label>
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {!files.id_document ? (
                       <div className="relative">
                         <input
                           type="file"
                           name="id_document"
                           onChange={handleFileChange}
-                          className="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
+                          className="block w-full text-xs sm:text-sm text-gray-400 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
                           accept=".pdf,.jpg,.jpeg,.png"
                           required
                         />
                       </div>
                     ) : (
-                      <div className="p-4 bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-xl">
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-xl">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                              <span className="text-blue-400">🆔</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                              <span className="text-blue-400 text-sm sm:text-base">🆔</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-white truncate" title={files.id_document.name}>
+                              <p className="text-xs sm:text-sm font-medium text-white truncate" title={files.id_document.name}>
                                 {formatFileName(files.id_document.name)}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-[10px] sm:text-xs text-gray-400">
                                 {formatFileSize(files.id_document.size)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2 flex-shrink-0">
-                            <span className="text-green-400 text-sm">✓</span>
+                          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                            <span className="text-green-400 text-xs sm:text-sm">✓</span>
                             <button
                               type="button"
                               onClick={() => handleRemoveFile('id_document')}
-                              className="text-red-400 hover:text-red-300 text-lg font-bold"
+                              className="text-red-400 hover:text-red-300 text-base sm:text-lg font-bold"
                               title="Remove file"
                             >
                               ×
@@ -649,49 +630,49 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-gray-500">Upload scanned copy of ID or passport</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500">Upload scanned copy of ID or passport</p>
                   </div>
                 </div>
 
                 {/* Matric Certificate */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-300">
+                <div className="space-y-2 sm:space-y-3">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Matric Certificate *
                   </label>
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {!files.matric_certificate ? (
                       <div className="relative">
                         <input
                           type="file"
                           name="matric_certificate"
                           onChange={handleFileChange}
-                          className="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-green-500/20 file:text-green-400 hover:file:bg-green-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
+                          className="block w-full text-xs sm:text-sm text-gray-400 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-green-500/20 file:text-green-400 hover:file:bg-green-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
                           accept=".pdf,.jpg,.jpeg,.png"
                           required
                         />
                       </div>
                     ) : (
-                      <div className="p-4 bg-gradient-to-r from-green-500/10 to-green-600/10 border border-green-500/20 rounded-xl">
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-green-500/10 to-green-600/10 border border-green-500/20 rounded-xl">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                              <span className="text-green-400">🎓</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                              <span className="text-green-400 text-sm sm:text-base">🎓</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-white truncate" title={files.matric_certificate.name}>
+                              <p className="text-xs sm:text-sm font-medium text-white truncate" title={files.matric_certificate.name}>
                                 {formatFileName(files.matric_certificate.name)}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-[10px] sm:text-xs text-gray-400">
                                 {formatFileSize(files.matric_certificate.size)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2 flex-shrink-0">
-                            <span className="text-green-400 text-sm">✓</span>
+                          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                            <span className="text-green-400 text-xs sm:text-sm">✓</span>
                             <button
                               type="button"
                               onClick={() => handleRemoveFile('matric_certificate')}
-                              className="text-red-400 hover:text-red-300 text-lg font-bold"
+                              className="text-red-400 hover:text-red-300 text-base sm:text-lg font-bold"
                               title="Remove file"
                             >
                               ×
@@ -700,49 +681,49 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-gray-500">Latest school results if no matric</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500">Latest school results if no matric</p>
                   </div>
                 </div>
 
                 {/* Proof of Payment */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-300">
+                <div className="space-y-2 sm:space-y-3">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Proof of Payment (R661.25) *
                   </label>
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {!files.proof_of_payment ? (
                       <div className="relative">
                         <input
                           type="file"
                           name="proof_of_payment"
                           onChange={handleFileChange}
-                          className="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-500/20 file:text-amber-400 hover:file:bg-amber-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
+                          className="block w-full text-xs sm:text-sm text-gray-400 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-amber-500/20 file:text-amber-400 hover:file:bg-amber-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
                           accept=".pdf,.jpg,.jpeg,.png"
                           required
                         />
                       </div>
                     ) : (
-                      <div className="p-4 bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-500/20 rounded-xl">
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-500/20 rounded-xl">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                              <span className="text-amber-400">💰</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                              <span className="text-amber-400 text-sm sm:text-base">💰</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-white truncate" title={files.proof_of_payment.name}>
+                              <p className="text-xs sm:text-sm font-medium text-white truncate" title={files.proof_of_payment.name}>
                                 {formatFileName(files.proof_of_payment.name)}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-[10px] sm:text-xs text-gray-400">
                                 {formatFileSize(files.proof_of_payment.size)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2 flex-shrink-0">
-                            <span className="text-green-400 text-sm">✓</span>
+                          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                            <span className="text-green-400 text-xs sm:text-sm">✓</span>
                             <button
                               type="button"
                               onClick={() => handleRemoveFile('proof_of_payment')}
-                              className="text-red-400 hover:text-red-300 text-lg font-bold"
+                              className="text-red-400 hover:text-red-300 text-base sm:text-lg font-bold"
                               title="Remove file"
                             >
                               ×
@@ -751,48 +732,48 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-gray-500">Bank deposit/EFT slip for R661.25 registration</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500">Bank deposit/EFT slip for registration</p>
                   </div>
                 </div>
 
                 {/* Additional Document 1 */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-300">
+                <div className="space-y-2 sm:space-y-3">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Additional Document 1 (Optional)
                   </label>
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {!files.additional_doc_1 ? (
                       <div className="relative">
                         <input
                           type="file"
                           name="additional_doc_1"
                           onChange={handleFileChange}
-                          className="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
+                          className="block w-full text-xs sm:text-sm text-gray-400 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                         />
                       </div>
                     ) : (
-                      <div className="p-4 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-xl">
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-xl">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                              <span className="text-purple-400">📄</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                              <span className="text-purple-400 text-sm sm:text-base">📄</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-white truncate" title={files.additional_doc_1.name}>
+                              <p className="text-xs sm:text-sm font-medium text-white truncate" title={files.additional_doc_1.name}>
                                 {formatFileName(files.additional_doc_1.name)}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-[10px] sm:text-xs text-gray-400">
                                 {formatFileSize(files.additional_doc_1.size)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2 flex-shrink-0">
-                            <span className="text-green-400 text-sm">✓</span>
+                          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                            <span className="text-green-400 text-xs sm:text-sm">✓</span>
                             <button
                               type="button"
                               onClick={() => handleRemoveFile('additional_doc_1')}
-                              className="text-red-400 hover:text-red-300 text-lg font-bold"
+                              className="text-red-400 hover:text-red-300 text-base sm:text-lg font-bold"
                               title="Remove file"
                             >
                               ×
@@ -801,48 +782,48 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-gray-500">Reference letter, CV, etc.</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500">Reference letter, CV, etc.</p>
                   </div>
                 </div>
 
                 {/* Additional Document 2 */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-300">
+                <div className="space-y-2 sm:space-y-3">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Additional Document 2 (Optional)
                   </label>
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {!files.additional_doc_2 ? (
                       <div className="relative">
                         <input
                           type="file"
                           name="additional_doc_2"
                           onChange={handleFileChange}
-                          className="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
+                          className="block w-full text-xs sm:text-sm text-gray-400 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                         />
                       </div>
                     ) : (
-                      <div className="p-4 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-xl">
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-xl">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                              <span className="text-purple-400">📄</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                              <span className="text-purple-400 text-sm sm:text-base">📄</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-white truncate" title={files.additional_doc_2.name}>
+                              <p className="text-xs sm:text-sm font-medium text-white truncate" title={files.additional_doc_2.name}>
                                 {formatFileName(files.additional_doc_2.name)}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-[10px] sm:text-xs text-gray-400">
                                 {formatFileSize(files.additional_doc_2.size)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2 flex-shrink-0">
-                            <span className="text-green-400 text-sm">✓</span>
+                          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                            <span className="text-green-400 text-xs sm:text-sm">✓</span>
                             <button
                               type="button"
                               onClick={() => handleRemoveFile('additional_doc_2')}
-                              className="text-red-400 hover:text-red-300 text-lg font-bold"
+                              className="text-red-400 hover:text-red-300 text-base sm:text-lg font-bold"
                               title="Remove file"
                             >
                               ×
@@ -851,22 +832,20 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-gray-500">Certificates, qualifications, etc.</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500">Certificates, qualifications, etc.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+              <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
                 <div className="flex items-start">
-                  <div className="mr-4 text-blue-400">ℹ️</div>
+                  <div className="mr-2 sm:mr-4 text-blue-400 flex-shrink-0">ℹ️</div>
                   <div>
-                    <p className="text-blue-400 font-medium mb-1">Important Notes:</p>
-                    <ul className="text-sm text-gray-400 space-y-1">
+                    <p className="text-blue-400 font-medium text-xs sm:text-sm mb-1">Important Notes:</p>
+                    <ul className="text-[10px] sm:text-xs text-gray-400 space-y-1">
                       <li>• Maximum file size: 5MB per document</li>
-                      <li>• Accepted formats: PDF, JPG, PNG, DOC, DOCX</li>
+                      <li>• Accepted formats: PDF, JPG, JPEG, PNG, DOC, DOCX</li>
                       <li>• Registration fee of R661.25 is non-refundable</li>
-                      <li>• All documents must be clear and legible</li>
-                      <li>• Applications will appear in admin dashboard immediately after submission</li>
                     </ul>
                   </div>
                 </div>
@@ -874,20 +853,20 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
             </div>
 
             {/* Submit Section */}
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-2">Ready to Submit</h3>
-                  <p className="text-gray-400 text-sm">
+            <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+                <div className="flex-1 text-center sm:text-left">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Ready to Submit</h3>
+                  <p className="text-gray-400 text-xs sm:text-sm">
                     Please review all information before submitting.
                   </p>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => window.location.reload()}
-                    className="px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-sm font-bold border border-white/10 transition-colors"
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs sm:text-sm font-bold border border-white/10 transition-colors"
                   >
                     Clear Form
                   </button>
@@ -895,15 +874,15 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold rounded-xl text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/30 flex items-center justify-center min-w-[200px]"
+                    className="px-6 sm:px-8 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold rounded-xl text-sm sm:text-base transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/30 flex items-center justify-center min-w-[160px] sm:min-w-[200px]"
                   >
                     {loading ? (
                       <>
-                        <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Submitting...
+                        <span>Submitting...</span>
                       </>
                     ) : (
                       'Submit Application'
@@ -912,11 +891,9 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                 </div>
               </div>
               
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <p className="text-center text-gray-500 text-sm">
-                  By submitting this application, you agree to our Terms of Service and confirm that all information provided is accurate.
-                  <br />
-                  You'll receive a confirmation email within 24 hours.
+              <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-white/10">
+                <p className="text-center text-gray-500 text-[10px] sm:text-xs">
+                  By submitting, you agree to our Terms of Service and confirm that all information is accurate.
                 </p>
               </div>
             </div>

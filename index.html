@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- OPTIMIZED: Better mobile viewport settings -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Bathudi Automotive Technical Center - Automotive Excellence</title>
     
     <!-- FAVICON - Using logo1.jpg -->
@@ -20,6 +21,8 @@
             color: white;
             margin: 0;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
@@ -42,6 +45,19 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Improved tap targets for mobile */
+        button, a, input, select, textarea {
+            touch-action: manipulation;
+        }
+        /* Prevent zoom on input focus for iOS */
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+        @media (max-width: 640px) {
+            .text-responsive {
+                font-size: clamp(1rem, 4vw, 1.5rem);
+            }
         }
     </style>
 <script type="importmap">
