@@ -134,9 +134,7 @@ const Gallery: React.FC = () => {
             Explore our state-of-the-art facilities and active training sessions.
           </p>
           {useBackendImages && (
-            <p className="text-xs text-blue-400 mt-2">
-              Showing {images.filter((img: any) => img.isBackendImage).length} admin uploaded images + 44 local images
-            </p>
+           
           )}
         </div>
 
