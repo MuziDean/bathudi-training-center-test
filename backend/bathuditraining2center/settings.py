@@ -96,17 +96,22 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'modules'),  # Your modules folder
 ]
 
-# Media files
+# ========== MEDIA FILES (User Uploads) ==========
+# FIXED: Using Railway volume for persistent storage
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Comment out local path - using Railway volume instead
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/app/media'  # Matches Railway volume mount path
 
 # Create necessary directories
 os.makedirs(os.path.join(BASE_DIR, 'static'), exist_ok=True)
 os.makedirs(os.path.join(BASE_DIR, 'pdfs'), exist_ok=True)
 os.makedirs(os.path.join(BASE_DIR, 'modules'), exist_ok=True)
-os.makedirs(os.path.join(BASE_DIR, 'media'), exist_ok=True)
 os.makedirs(os.path.join(BASE_DIR, 'templates'), exist_ok=True)
 os.makedirs(os.path.join(BASE_DIR, 'templates/admin/core/application'), exist_ok=True)
+
+# Keep local media directory for development (won't affect Railway)
+os.makedirs(os.path.join(BASE_DIR, 'media'), exist_ok=True)
 
 # ========== DJANGO REST FRAMEWORK ==========
 REST_FRAMEWORK = {
@@ -169,32 +174,23 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
-
 # ========== FILE UPLOAD SETTINGS ==========
 FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 # ========== TWILIO WHATSAPP SETTINGS ==========
-# Get these from Twilio Console: https://console.twilio.com
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
 TWILIO_WHATSAPP_NUMBER = os.environ.get('TWILIO_WHATSAPP_NUMBER', 'whatsapp:+14155238886')
 
-# ========== WHATSAPP CLOUD API SETTINGS (Meta/Facebook) ==========
-# Get these from Meta Developers: https://developers.facebook.com
+# ========== WHATSAPP CLOUD API SETTINGS ==========
 WHATSAPP_CLOUD_API_TOKEN = os.environ.get('WHATSAPP_CLOUD_API_TOKEN', '')
 WHATSAPP_CLOUD_PHONE_ID = os.environ.get('WHATSAPP_CLOUD_PHONE_ID', '')
 WHATSAPP_CLOUD_NUMBER = os.environ.get('WHATSAPP_CLOUD_NUMBER', '+27689176294')
 
 # ========== PRE-APPROVED TEMPLATE SIDS ==========
-# Twilio pre-approved template for order notifications
-# This can be used immediately without approval
 TWILIO_ORDER_TEMPLATE_SID = os.environ.get('TWILIO_ORDER_TEMPLATE_SID', 'HX350d429d32e64a552466cafece95f3c')
-
-# Custom template SIDs (create these in Twilio Content Template Builder)
 TWILIO_APPROVAL_TEMPLATE_SID = os.environ.get('TWILIO_APPROVAL_TEMPLATE_SID', '')
 TWILIO_REJECTION_TEMPLATE_SID = os.environ.get('TWILIO_REJECTION_TEMPLATE_SID', '')
 
@@ -206,22 +202,11 @@ BATHUDI_ADDRESS = os.environ.get('BATHUDI_ADDRESS', '123 Training Street, Johann
 BATHUDI_WEBSITE = os.environ.get('BATHUDI_WEBSITE', 'https://bathudi.co.za')
 
 # ========== WHATSAPP NOTIFICATION SETTINGS ==========
-# Which WhatsApp provider to use: 'twilio' or 'cloud'
 WHATSAPP_PROVIDER = os.environ.get('WHATSAPP_PROVIDER', 'twilio')
-
-# Enable/disable WhatsApp notifications
 WHATSAPP_NOTIFICATIONS_ENABLED = os.environ.get('WHATSAPP_NOTIFICATIONS_ENABLED', 'True') == 'True'
-
-# Enable/disable approval notifications
 WHATSAPP_SEND_APPROVAL = os.environ.get('WHATSAPP_SEND_APPROVAL', 'True') == 'True'
-
-# Enable/disable rejection notifications
 WHATSAPP_SEND_REJECTION = os.environ.get('WHATSAPP_SEND_REJECTION', 'True') == 'True'
-
-# Sandbox mode - if True, only send to verified numbers in Twilio console
 WHATSAPP_SANDBOX_MODE = os.environ.get('WHATSAPP_SANDBOX_MODE', 'True') == 'True'
-
-# List of verified test numbers (comma separated)
 WHATSAPP_TEST_NUMBERS = os.environ.get('WHATSAPP_TEST_NUMBERS', '+263773074487,+27681234567').split(',')
 
 # ========== LOGGING CONFIGURATION ==========
@@ -275,7 +260,6 @@ REGISTRATION_FEE_AMOUNT = os.environ.get('REGISTRATION_FEE_AMOUNT', '661.25')
 REGISTRATION_FEE_CURRENCY = os.environ.get('REGISTRATION_FEE_CURRENCY', 'ZAR')
 
 # ========== COURSE MAPPING ==========
-# Map form course IDs to database course titles
 COURSE_ID_MAPPING = {
     'automotive_engine_repairer': 'Occupational Certificate: Automotive Engine Repairer',
     'automotive_clutch_brake_repairer': 'Occupational Certificate: Automotive Clutch and Brake Repairer',
@@ -284,7 +268,6 @@ COURSE_ID_MAPPING = {
 }
 
 # ========== APPLICATION STATUS MESSAGES ==========
-# WhatsApp message templates
 WHATSAPP_APPROVAL_MESSAGE = """
 Good day this is an automated message from Bathudi Automotive Training Center 🇿🇦
 
