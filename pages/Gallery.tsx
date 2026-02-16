@@ -4,23 +4,41 @@ const Gallery: React.FC = () => {
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [useBackendImages, setUseBackendImages] = useState(false);
 
   // API Base URL
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-  // Create an array of 44 images with fallback extensions
+  // Generate ALL 44 local images with correct extensions
   const generateLocalImages = () => {
     const localImages = [];
-    for (let i = 1; i <= 44; i++) {
+    
+    // Images 1-11 are .jpg
+    for (let i = 1; i <= 11; i++) {
       localImages.push({
         id: i,
-        // Store both possible extensions
         jpgPath: `/images/${i}.jpg`,
         jpegPath: `/images/${i}.jpeg`,
-        currentPath: `/images/${i}.jpg`, // Start with .jpg
-        label: `Gallery Image ${i}`
+        currentPath: `/images/${i}.jpg`, // Start with .jpg for 1-11
+        label: `Gallery Image ${i}`,
+        extension: 'jpg',
+        isBackendImage: false
       });
     }
+    
+    // Images 12-44 are .jpeg
+    for (let i = 12; i <= 44; i++) {
+      localImages.push({
+        id: i,
+        jpgPath: `/images/${i}.jpg`,
+        jpegPath: `/images/${i}.jpeg`,
+        currentPath: `/images/${i}.jpeg`, // Start with .jpeg for 12-44
+        label: `Gallery Image ${i}`,
+        extension: 'jpeg',
+        isBackendImage: false
+      });
+    }
+    
     return localImages;
   };
 
@@ -29,23 +47,36 @@ const Gallery: React.FC = () => {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        // Try to fetch from backend first
+        // Try to fetch from backend first (admin uploaded images)
         const res = await fetch(`${API_BASE_URL}/gallery/`);
         if (res.ok) {
           const backendImages = await res.json();
-          // If backend has images, use them
+          // If backend has images, combine them with local images
           if (backendImages.length > 0) {
-            setImages(backendImages);
+            console.log(`Found ${backendImages.length} admin-uploaded images`);
+            
+            // Format backend images to match our structure
+            const formattedBackendImages = backendImages.map((img: any, index: number) => ({
+              id: `backend-${img.id || index}`,
+              image: img.image_url || img.image,
+              label: img.title || `Admin Upload ${index + 1}`,
+              isBackendImage: true
+            }));
+            
+            // Combine backend images with local images
+            setImages([...formattedBackendImages, ...localImages]);
+            setUseBackendImages(true);
           } else {
+            // No backend images, just use local
             setImages(localImages);
           }
         } else {
-          // If backend fails, use local images
+          // Backend failed, just use local images
+          console.warn('Backend gallery fetch failed, using local images only');
           setImages(localImages);
         }
       } catch (e) {
-        console.warn('Backend offline, using local gallery images.');
-        // Always fallback to local images
+        console.warn('Backend offline, using local gallery images only.');
         setImages(localImages);
       } finally {
         setLoading(false);
@@ -55,22 +86,40 @@ const Gallery: React.FC = () => {
     fetchGallery();
   }, []);
 
-  // Handle image error - try .jpeg if .jpg fails
+  // Handle image error with extension fallback
   const handleImageError = (img: any, e: React.SyntheticEvent<HTMLImageElement>) => {
     const target = e.currentTarget;
     const currentSrc = target.src;
     
-    // If current src ends with .jpg, try .jpeg
-    if (currentSrc.includes('.jpg') && !failedImages.has(`${img.id}-jpeg`)) {
-      console.log(`Trying .jpeg for image ${img.id}`);
-      const newPath = `/images/${img.id}.jpeg`;
-      target.src = newPath;
-      setFailedImages(prev => new Set(prev).add(`${img.id}-jpg`));
+    // For backend images, just show placeholder if they fail
+    if (img.isBackendImage) {
+      console.log(`Backend image failed: ${img.id}`);
+      target.src = `https://via.placeholder.com/400x300/1e293b/64748b?text=Admin+Image`;
+      target.onerror = null;
+      return;
     }
-    // If .jpeg also fails, show placeholder
-    else if (currentSrc.includes('.jpeg') || failedImages.has(`${img.id}-jpeg`)) {
-      console.log(`Using placeholder for image ${img.id}`);
-      target.src = `https://via.placeholder.com/400x300/1e293b/64748b?text=Image+${img.id}`;
+    
+    // For local images, try extension fallback
+    const imageId = img.id;
+    const failedJpg = failedImages.has(`${imageId}-jpg`);
+    const failedJpeg = failedImages.has(`${imageId}-jpeg`);
+    
+    // If current src ends with .jpg and we haven't tried .jpeg yet
+    if (currentSrc.includes('.jpg') && !failedJpeg) {
+      console.log(`Image ${imageId}: .jpg failed, trying .jpeg`);
+      target.src = `/images/${imageId}.jpeg`;
+      setFailedImages(prev => new Set(prev).add(`${imageId}-jpg`));
+    }
+    // If current src ends with .jpeg and we haven't tried .jpg yet
+    else if (currentSrc.includes('.jpeg') && !failedJpg) {
+      console.log(`Image ${imageId}: .jpeg failed, trying .jpg`);
+      target.src = `/images/${imageId}.jpg`;
+      setFailedImages(prev => new Set(prev).add(`${imageId}-jpeg`));
+    }
+    // Both extensions failed, show placeholder with image number
+    else {
+      console.log(`Image ${imageId}: both extensions failed, using placeholder`);
+      target.src = `https://via.placeholder.com/400x300/1e293b/64748b?text=Image+${imageId}`;
       target.onerror = null; // Prevent infinite loop
     }
   };
@@ -84,6 +133,11 @@ const Gallery: React.FC = () => {
           <p className="text-gray-400 max-w-2xl mx-auto">
             Explore our state-of-the-art facilities and active training sessions.
           </p>
+          {useBackendImages && (
+            <p className="text-xs text-blue-400 mt-2">
+              Showing {images.filter((img: any) => img.isBackendImage).length} admin uploaded images + 44 local images
+            </p>
+          )}
         </div>
 
         {loading ? (
@@ -93,10 +147,14 @@ const Gallery: React.FC = () => {
         ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
             {images.map((img) => {
-              // Handle both backend image objects and local image objects
-              const imageId = img.id;
-              const imageSrc = img.image || img.jpgPath || `/images/${img.id}.jpg`;
-              const imageLabel = img.title || img.label || `Gallery Image ${img.id}`;
+              // Determine the image source
+              let imageSrc;
+              if (img.isBackendImage) {
+                imageSrc = img.image; // Backend image URL
+              } else {
+                // Local image - use the appropriate path based on ID
+                imageSrc = img.currentPath || (img.id <= 11 ? `/images/${img.id}.jpg` : `/images/${img.id}.jpeg`);
+              }
               
               return (
                 <div 
@@ -106,13 +164,18 @@ const Gallery: React.FC = () => {
                   <div className="relative overflow-hidden">
                     <img 
                       src={imageSrc}
-                      alt={imageLabel}
+                      alt={img.label || `Gallery Image ${img.id}`}
                       className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700"
                       loading="lazy"
                       onError={(e) => handleImageError(img, e)}
                     />
                     <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/20 transition-colors duration-500" />
                   </div>
+                  {img.isBackendImage && (
+                    <div className="absolute top-2 right-2 bg-blue-600/80 text-white text-[8px] px-1.5 py-0.5 rounded">
+                      Admin
+                    </div>
+                  )}
                 </div>
               );
             })}
