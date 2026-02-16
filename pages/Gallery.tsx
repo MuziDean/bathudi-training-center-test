@@ -133,9 +133,7 @@ const Gallery: React.FC = () => {
           <p className="text-gray-400 max-w-2xl mx-auto">
             Explore our state-of-the-art facilities and active training sessions.
           </p>
-          {useBackendImages && (
-           
-          )}
+          {/* REMOVED: The empty conditional that was causing the error */}
         </div>
 
         {loading ? (
