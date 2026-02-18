@@ -44,7 +44,6 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
         setLoading(true);
         setError(null);
         
-        // Try to fetch from backend API
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
         const response = await fetch(`${API_BASE_URL}/courses/${courseId}/`);
         
@@ -58,7 +57,6 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
       } catch (err) {
         console.error('Error fetching course details:', err);
         
-        // Fallback to local COURSES data
         try {
           const { COURSES } = await import('../constants');
           const localCourse = COURSES.find(c => String(c.id) === String(courseId));
@@ -182,9 +180,7 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
           Back to All Courses
         </button>
 
-        {/* Rest of the component remains exactly the same... */}
-        {/* ... */}
-        
+        {/* Course Header */}
         <div className="glass rounded-3xl overflow-hidden mb-8">
           <div className="md:flex">
             <div className="md:w-2/3 p-8">
@@ -247,24 +243,18 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
               </div>
             </div>
             
+            {/* FIXED: Only showing registration fee and assessment fee */}
             <div className="md:w-1/3 p-8 bg-white/5 flex items-center justify-center">
               <div className="text-center">
-                <div className="text-5xl font-bold text-white mb-2">{formatCurrency(course.deposit_amount)}</div>
-                <div className="text-gray-400 mb-4">Initial Deposit</div>
+                <div className="text-3xl font-bold text-white mb-2">{formatCurrency(course.registration_fee)}</div>
+                <div className="text-gray-400 mb-4">Registration Fee</div>
                 <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Monthly:</span>
-                    <span className="text-white font-medium">{formatCurrency(course.monthly_payment)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Assessment:</span>
-                    <span className="text-white font-medium">{formatCurrency(course.assessment_fee)}</span>
-                  </div>
                   <div className="flex justify-between border-t border-white/10 pt-2">
-                    <span className="text-gray-400">Full Course Total:</span>
-                    <span className="text-white font-bold">{formatCurrency(course.total_payment)}</span>
+                    <span className="text-gray-400">Assessment Fee:</span>
+                    <span className="text-white font-bold">{formatCurrency(course.assessment_fee)}</span>
                   </div>
                 </div>
+                <p className="text-xs text-gray-500 mt-4">Non-refundable registration fee</p>
               </div>
             </div>
           </div>
@@ -465,12 +455,6 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
                           </svg>
                           Proof of Registration Fee Payment (R661.25)
                         </li>
-                        <li className="flex items-center">
-                          <svg className="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Recent Passport Photos (2)
-                        </li>
                       </ul>
                     </div>
                   </div>
@@ -535,24 +519,9 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
                           <td className="py-4 px-6 text-gray-400">Non-refundable, due with application</td>
                         </tr>
                         <tr className="border-b border-white/5">
-                          <td className="py-4 px-6 text-gray-300">Deposit Amount</td>
-                          <td className="py-4 px-6 text-white font-bold">{formatCurrency(course.deposit_amount)}</td>
-                          <td className="py-4 px-6 text-gray-400">Required to secure enrollment</td>
-                        </tr>
-                        <tr className="border-b border-white/5">
-                          <td className="py-4 px-6 text-gray-300">Monthly Payment</td>
-                          <td className="py-4 px-6 text-white font-bold">{formatCurrency(course.monthly_payment)}</td>
-                          <td className="py-4 px-6 text-gray-400">Due on 1st of each month</td>
-                        </tr>
-                        <tr className="border-b border-white/5">
                           <td className="py-4 px-6 text-gray-300">Assessment Fee</td>
                           <td className="py-4 px-6 text-white font-bold">{formatCurrency(course.assessment_fee)}</td>
                           <td className="py-4 px-6 text-gray-400">Final assessment and certification</td>
-                        </tr>
-                        <tr className="bg-white/5">
-                          <td className="py-4 px-6 text-white font-bold">Total Course Fee</td>
-                          <td className="py-4 px-6 text-white font-bold text-xl">{formatCurrency(course.total_payment)}</td>
-                          <td className="py-4 px-6 text-gray-400">Inclusive of all fees</td>
                         </tr>
                       </tbody>
                     </table>
@@ -565,10 +534,6 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
                         <li className="flex items-center">
                           <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
                           <span>Full upfront payment (10% discount available)</span>
-                        </li>
-                        <li className="flex items-center">
-                          <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                          <span>Deposit + monthly installments</span>
                         </li>
                         <li className="flex items-center">
                           <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
@@ -594,7 +559,7 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onNavigate }) => 
                           <svg className="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Late payments incur R500 penalty after 7th of month</span>
+                          <span>Registration fee is non-refundable</span>
                         </li>
                         <li className="flex items-start">
                           <svg className="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -56,7 +56,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onStudentPorta
         : 'py-3 md:py-4 bg-gradient-to-b from-slate-950/90 to-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex items-center justify-between">
-        {/* Logo Section - Optimized for mobile */}
+        {/* Logo Section - UPDATED HEADING */}
         <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group" onClick={handleLogoClick}>
           <div className="relative">
             <img 
@@ -81,12 +81,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onStudentPorta
               BATHUDI
             </span>
             <span className="text-[8px] sm:text-[10px] md:text-xs lg:text-sm text-red-400 font-medium tracking-widest uppercase">
-              Automotive Technical Center
+              SKILLS DEVELOPMENT TRAINING CENTRE
             </span>
           </div>
         </div>
 
-        {/* Desktop Navigation - Hidden on mobile */}
+        {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
           {menuItems.map((item) => (
             <button
@@ -122,7 +122,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onStudentPorta
           </button>
         </div>
 
-        {/* Mobile Menu Toggle - Only visible on mobile */}
+        {/* Mobile Menu Toggle */}
         <button 
           className="lg:hidden p-2 text-white hover:text-red-400 transition-colors relative z-50 focus:outline-none"
           onClick={(e) => {
@@ -145,7 +145,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onStudentPorta
         </button>
       </div>
 
-      {/* Mobile Menu Overlay - Optimized for touch */}
+      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
           className="lg:hidden fixed inset-0 bg-slate-950/98 backdrop-blur-md pt-20 z-40 animate-fadeIn"
@@ -244,7 +244,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onStudentPorta
           font-family: 'Orbitron', sans-serif;
         }
         
-        /* Improve tap targets on mobile */
         @media (max-width: 1024px) {
           button {
             min-height: 44px;

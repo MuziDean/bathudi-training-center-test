@@ -125,7 +125,7 @@ const Courses: React.FC<CoursesProps> = ({ onNavigate, onViewCourse }) => {
                 <div className="p-8">
                   <div className="flex justify-between items-start mb-4">
                     <h4 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                      {course.title}
+                      {course.short_title || course.title}
                     </h4>
                     <span className="bg-blue-600/20 text-blue-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ml-2 whitespace-nowrap">
                       {course.duration}
@@ -136,25 +136,17 @@ const Courses: React.FC<CoursesProps> = ({ onNavigate, onViewCourse }) => {
                     {course.description}
                   </p>
                   
-                  {/* Fee Summary */}
-                  {course.deposit_amount && (
-                    <div className="mb-6 p-4 rounded-lg bg-white/5 border border-white/5">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-400">Deposit:</span>
-                        <span className="text-white font-bold">{formatCurrency(course.deposit_amount)}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-400">Monthly:</span>
-                        <span className="text-white font-bold">{formatCurrency(course.monthly_payment)}</span>
-                      </div>
-                      {course.assessment_fee && (
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-white/10">
-                          <span className="text-sm text-gray-400">Assessment:</span>
-                          <span className="text-white font-bold">{formatCurrency(course.assessment_fee)}</span>
-                        </div>
-                      )}
+                  {/* FIXED: Only showing registration and assessment fees */}
+                  <div className="mb-6 p-4 rounded-lg bg-white/5 border border-white/5">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-400">Registration Fee:</span>
+                      <span className="text-white font-bold">{formatCurrency(course.registration_fee)}</span>
                     </div>
-                  )}
+                    <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                      <span className="text-sm text-gray-400">Assessment Fee:</span>
+                      <span className="text-white font-bold">{formatCurrency(course.assessment_fee)}</span>
+                    </div>
+                  </div>
                   
                   {/* PDF Download Button */}
                   <div className="mb-4">

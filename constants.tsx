@@ -18,7 +18,7 @@ export const COURSES: Course[] = [
     level: "beginner",
     curriculum: "Module 1: Engine Fundamentals\n- Engine types and classifications\n- Engine components and functions\n- Engine measurement and specifications\n\nModule 2: Engine Disassembly\n- Safe disassembly procedures\n- Component identification\n- Damage assessment\n\nModule 3: Engine Assembly\n- Component fitting techniques\n- Torque specifications\n- Clearance measurements\n\nModule 4: Engine Testing\n- Compression testing\n- Leak-down testing\n- Performance evaluation",
     prerequisites: "Basic understanding of mechanical systems. Interest in engine technology.",
-    requirements: "Grade 10 certificate. Good hand-eye coordination and mechanical aptitude.",
+    requirements: "Grade 12 with Mathematics/Mathematical Literacy OR any N certification (N2/N3/N4). Good hand-eye coordination and mechanical aptitude.",
     career_opportunities: "Engine Fitter, Engine Assembler, Engine Technician, Automotive Mechanic",
     course_pdf_url: "/pdfs/course-outlines/Automotive Engine Fitter.pdf",
     image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
@@ -45,7 +45,7 @@ export const COURSES: Course[] = [
     level: "beginner",
     curriculum: "Module 1: Brake System Fundamentals\n- Hydraulic brake systems\n- Disc and drum brakes\n- ABS and electronic systems\n\nModule 2: Clutch Systems\n- Manual transmission clutches\n- Hydraulic clutch systems\n- Automatic transmission components\n\nModule 3: Diagnosis and Repair\n- Brake system diagnosis\n- Clutch system troubleshooting\n- Component replacement\n\nModule 4: Safety and Testing\n- Brake testing procedures\n- Safety standards\n- Quality control",
     prerequisites: "Basic mechanical knowledge. Attention to detail for safety-critical systems.",
-    requirements: "Grade 10 certificate. Valid driver's license recommended.",
+    requirements: "Grade 9 or Year 4 (ABET Level 4). No mathematics requirement. Valid driver's license recommended.",
     career_opportunities: "Brake Technician, Clutch Specialist, Automotive Repairer, Service Technician",
     course_pdf_url: "/pdfs/course-outlines/Automotive Clutch and Brake Repairer.pdf",
     image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
@@ -99,7 +99,7 @@ export const COURSES: Course[] = [
     level: "beginner",
     curriculum: "Module 1: Workshop Basics\n- Workshop safety procedures\n- Tool identification and usage\n- Workshop organization\n\nModule 2: Vehicle Maintenance\n- Basic maintenance procedures\n- Fluid checks and changes\n- Tire service\n\nModule 3: Assistance Skills\n- Technician assistance\n- Parts handling\n- Customer service\n\nModule 4: Workshop Operations\n- Inventory management\n- Workshop cleaning\n- Safety compliance",
     prerequisites: "No prior experience required. Interest in automotive work.",
-    requirements: "Grade 9 certificate. Willingness to learn and work in a team.",
+    requirements: "Grade 12 OR Grade 10 with relevant experience. Willingness to learn and work in a team.",
     career_opportunities: "Workshop Assistant, Maintenance Assistant, Service Helper, Automotive Apprentice",
     course_pdf_url: "/pdfs/course-outlines/Automotive Workshop Assistant.pdf",
     image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
@@ -262,7 +262,6 @@ export const CONTACT_INFO = {
   hours: 'Monday - Friday: 8:00 AM - 5:00 PM\nSaturday: 9:00 AM - 1:00 PM'
 };
 
-// Additional constants for API endpoints
 export const API_ENDPOINTS = {
   courses: 'http://localhost:8000/api/courses/',
   applications: 'http://localhost:8000/api/applications/',
@@ -270,20 +269,17 @@ export const API_ENDPOINTS = {
   generatePdf: (courseId: string) => `http://localhost:8000/api/course/${courseId}/pdf/generate/`,
 };
 
-// Course duration options
 export const COURSE_DURATIONS = [
   '3 months', '4 months', '5 months', '6 months', 
   '8 months', '9 months', '12 months', '18 months'
 ];
 
-// Course levels
 export const COURSE_LEVELS = [
   { value: 'beginner', label: 'Beginner' },
   { value: 'intermediate', label: 'Intermediate' },
   { value: 'advanced', label: 'Advanced' }
 ];
 
-// Application status options
 export const APPLICATION_STATUS = [
   { value: 'pending', label: 'Pending', color: 'yellow' },
   { value: 'approved', label: 'Approved', color: 'green' },
@@ -291,7 +287,6 @@ export const APPLICATION_STATUS = [
   { value: 'contacted', label: 'Contacted', color: 'blue' }
 ];
 
-// Payment methods
 export const PAYMENT_METHODS = [
   'Bank Transfer',
   'Cash Deposit',
@@ -300,7 +295,6 @@ export const PAYMENT_METHODS = [
   'Debit Card'
 ];
 
-// Gallery categories
 export const GALLERY_CATEGORIES = [
   'classroom',
   'event', 
@@ -311,10 +305,8 @@ export const GALLERY_CATEGORIES = [
   'training'
 ];
 
-// Testimonial ratings
 export const TESTIMONIAL_RATINGS = [1, 2, 3, 4, 5];
 
-// Social media links
 export const SOCIAL_MEDIA = {
   facebook: 'https://facebook.com/bathuditraining',
   twitter: 'https://twitter.com/bathuditraining',
@@ -323,7 +315,6 @@ export const SOCIAL_MEDIA = {
   youtube: 'https://youtube.com/bathuditraining'
 };
 
-// Quick links for footer
 export const QUICK_LINKS = [
   { name: 'Home', path: '/' },
   { name: 'Courses', path: '/courses' },
@@ -333,7 +324,6 @@ export const QUICK_LINKS = [
   { name: 'Apply Now', path: '/apply' }
 ];
 
-// Footer contact info
 export const FOOTER_CONTACT = {
   phone: '+27 12 345 6789',
   email: 'info@bathuditraining.co.za',
