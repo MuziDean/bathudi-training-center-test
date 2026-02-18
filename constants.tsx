@@ -31,7 +31,7 @@ export const COURSES: Course[] = [
   {
     id: 2,
     title: "Occupational Certificate: Automotive Clutch and Brake Repairer",
-    short_title: "Clutch & Brake Specialist",
+    short_title: " Automotive Clutch and Brake Repairer",
     description: "Comprehensive training program specializing in automotive clutch and brake systems. Covers diagnosis, repair, and maintenance of braking systems, clutch assemblies, and related components.",
     short_description: "Specialize in automotive clutch and brake system repair",
     duration: "12 months",
