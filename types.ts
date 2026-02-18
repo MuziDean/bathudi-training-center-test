@@ -24,7 +24,10 @@ export enum Page {
   StudentCourses = 'StudentCourses',
   StudentAnnouncements = 'StudentAnnouncements',
   StudentDocuments = 'StudentDocuments',
-  StudentFees = 'StudentFees'
+  StudentFees = 'StudentFees',
+  //PayFast
+  PaymentSuccess = 'payment-success',
+  PaymentCancel = 'payment-cancel',
 }
 
 export type ViewMode = 'public' | 'admin' | 'student';

@@ -1,6 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 import React, { useState, useEffect } from 'react';
 import { Page } from '../types';
+import { generatePayFastSignature, PAYFAST_URLS, generatePaymentId, PayFastData } from '../src/utils/payfast';
 
 interface ApplyProps {
   onNavigate: (page: Page) => void;
@@ -8,6 +8,7 @@ interface ApplyProps {
 
 const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [availableCourses, setAvailableCourses] = useState<any[]>([]);
@@ -35,6 +36,13 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     additional_doc_2: null as File | null,
   });
 
+  // PayFast configuration from environment variables
+  const PAYFAST_MERCHANT_ID = import.meta.env.VITE_PAYFAST_MERCHANT_ID || '';
+  const PAYFAST_MERCHANT_KEY = import.meta.env.VITE_PAYFAST_MERCHANT_KEY || '';
+  const PAYFAST_PASSPHRASE = import.meta.env.VITE_PAYFAST_PASSPHRASE || '';
+  const IS_SANDBOX = import.meta.env.VITE_PAYFAST_SANDBOX === 'true';
+
+  // Fetch available courses from backend
   useEffect(() => {
     fetchCourses();
   }, []);
@@ -53,6 +61,85 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
+  // Handle PayFast payment
+  const handlePayNow = async () => {
+    // Validate required fields for payment
+    if (!formData.name || !formData.surname || !formData.email) {
+      alert('Please fill in your name, surname, and email before proceeding to payment.');
+      return;
+    }
+
+    if (!formData.course) {
+      alert('Please select a course before proceeding to payment.');
+      return;
+    }
+
+    setPaymentLoading(true);
+
+    try {
+      // Get the base URL for return/cancel pages
+      const baseUrl = window.location.origin;
+      
+      // Generate a unique payment ID
+      const paymentId = generatePaymentId();
+      
+      // Prepare payment data - FIXED: Now matches PayFastData interface
+      const paymentData: PayFastData = {
+        merchant_id: PAYFAST_MERCHANT_ID,
+        merchant_key: PAYFAST_MERCHANT_KEY,
+        return_url: `${baseUrl}/payment-success`,
+        cancel_url: `${baseUrl}/payment-cancel`,
+        notify_url: `${baseUrl}/api/payfast/notify`, // You'll need to create this endpoint
+        name_first: formData.name,
+        name_last: formData.surname,
+        email_address: formData.email,
+        cell_number: formData.mobile,
+        m_payment_id: paymentId,
+        amount: '661.25', // Fixed registration fee
+        item_name: 'Course Registration Fee',
+        item_description: `Registration fee for ${formData.course}`,
+        email_confirmation: '1',
+        confirmation_address: formData.email,
+      };
+
+      // Generate signature
+      const signature = generatePayFastSignature(paymentData, PAYFAST_PASSPHRASE);
+      
+      // Create a form to submit to PayFast
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = IS_SANDBOX ? PAYFAST_URLS.sandbox : PAYFAST_URLS.live;
+      
+      // Add all payment data as hidden inputs
+      Object.entries(paymentData).forEach(([key, value]) => {
+        if (value) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = value.toString();
+          form.appendChild(input);
+        }
+      });
+      
+      // Add signature
+      const signatureInput = document.createElement('input');
+      signatureInput.type = 'hidden';
+      signatureInput.name = 'signature';
+      signatureInput.value = signature;
+      form.appendChild(signatureInput);
+      
+      // Submit the form
+      document.body.appendChild(form);
+      form.submit();
+      
+    } catch (error) {
+      console.error('Payment initiation error:', error);
+      alert('Failed to initiate payment. Please try again.');
+      setPaymentLoading(false);
+    }
+  };
+
+  // Handle text input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -61,6 +148,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }));
   };
 
+  // Handle file input changes
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files: fileList } = e.target;
     if (fileList && fileList[0]) {
@@ -71,6 +159,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
+  // Remove uploaded file
   const handleRemoveFile = (fileType: keyof typeof files) => {
     setFiles(prev => ({
       ...prev,
@@ -83,22 +172,16 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
+  // Format file name to prevent overflow
   const formatFileName = (fileName: string, maxLength: number = 20): string => {
-    if (fileName.length <= maxLength) {
-      return fileName;
-    }
-    
+    if (fileName.length <= maxLength) return fileName;
     const extension = fileName.substring(fileName.lastIndexOf('.'));
     const nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
-    
-    if (nameWithoutExtension.length <= maxLength - 3) {
-      return fileName;
-    }
-    
     const truncatedName = nameWithoutExtension.substring(0, maxLength - 8) + '...';
     return truncatedName + extension;
   };
 
+  // Format file size
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -107,6 +190,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  // Validate form
   const validateForm = () => {
     const requiredFields = ['name', 'surname', 'age', 'mobile', 'email', 'id_number', 'address', 'education_level', 'previous_school', 'course'];
     for (const field of requiredFields) {
@@ -135,7 +219,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       return false;
     }
 
-    const requiredFiles = ['id_document', 'matric_certificate', 'proof_of_payment'];
+    const requiredFiles = ['id_document', 'matric_certificate'];
     for (const fileField of requiredFiles) {
       if (!files[fileField as keyof typeof files]) {
         setErrorMessage(`Please upload ${fileField.replace('_', ' ')}`);
@@ -154,6 +238,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     return true;
   };
 
+  // Submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -262,22 +347,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  const testAPIConnection = async () => {
-    try {
-      alert('🔌 Testing connection to server...');
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-      const response = await fetch(`${API_BASE_URL}/applications/`);
-      if (response.ok) {
-        const data = await response.json();
-        alert(`✅ Server connection successful!\n\nFound ${data.length} applications in the system.\n\nServer is ready to accept your application.`);
-      } else {
-        alert(`⚠️ Server responded with error ${response.status}\n\nCheck your backend connection.`);
-      }
-    } catch (error) {
-      alert('❌ Cannot connect to server!\n\nPlease ensure your backend is running and CORS is configured.');
-    }
-  };
-
+  // Go back to courses
   const handleBackToCourses = () => {
     onNavigate(Page.Courses);
   };
@@ -304,7 +374,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
           <div className="inline-flex flex-col sm:flex-row items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-full mb-4 sm:mb-6">
             <span className="text-amber-400 font-bold text-sm sm:text-base">📢 Registration Fee: R661.25</span>
             <span className="hidden sm:inline mx-3 text-gray-400">•</span>
-            <span className="text-gray-300 text-xs sm:text-sm">Required for all applications</span>
+            <span className="text-gray-300 text-xs sm:text-sm">Pay online or upload proof</span>
           </div>
           <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto">
             Complete the form below to apply for your chosen course. All fields are required unless marked optional.
@@ -322,7 +392,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                 <p className="text-green-400 font-bold text-base sm:text-lg">Application Submitted Successfully!</p>
                 <p className="text-green-400/80 text-xs sm:text-sm mt-1">
                   Your application has been received and will appear in the admin dashboard for review.
-                  We'll contact you within 3-5 working days.
                 </p>
               </div>
             </div>
@@ -508,17 +577,15 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     required
                   >
                     <option value="" style={{ backgroundColor: '#1f2937', color: 'white' }}>Select your education level</option>
+                    <option value="Grade 9" style={{ backgroundColor: '#1f2937', color: 'white' }}>Grade 9</option>
                     <option value="Grade 10" style={{ backgroundColor: '#1f2937', color: 'white' }}>Grade 10</option>
                     <option value="Grade 11" style={{ backgroundColor: '#1f2937', color: 'white' }}>Grade 11</option>
                     <option value="Grade 12 (Matric)" style={{ backgroundColor: '#1f2937', color: 'white' }}>Grade 12 (Matric)</option>
                     <option value="N3" style={{ backgroundColor: '#1f2937', color: 'white' }}>N3</option>
                     <option value="N4" style={{ backgroundColor: '#1f2937', color: 'white' }}>N4</option>
-                    <option value="N5" style={{ backgroundColor: '#1f2937', color: 'white' }}>N5</option>
-                    <option value="N6" style={{ backgroundColor: '#1f2937', color: 'white' }}>N6</option>
                     <option value="Certificate" style={{ backgroundColor: '#1f2937', color: 'white' }}>Certificate</option>
                     <option value="Diploma" style={{ backgroundColor: '#1f2937', color: 'white' }}>Diploma</option>
                     <option value="Degree" style={{ backgroundColor: '#1f2937', color: 'white' }}>Degree</option>
-                    <option value="Other" style={{ backgroundColor: '#1f2937', color: 'white' }}>Other Qualification</option>
                   </select>
                 </div>
                 
@@ -577,9 +644,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
               <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center">
                 <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-amber-500/20 flex items-center justify-center mr-2 sm:mr-3 text-sm sm:text-base">3</span>
                 Required Documents
-                <span className="ml-2 sm:ml-4 text-[10px] sm:text-xs font-normal text-amber-400 bg-amber-500/10 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
-                  R661.25 Fee
-                </span>
               </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -681,16 +745,51 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
-                    <p className="text-[10px] sm:text-xs text-gray-500">Latest school results if no matric</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500">Latest school results or certificate</p>
                   </div>
                 </div>
 
-                {/* Proof of Payment */}
+                {/* Proof of Payment - With Pay Now Button */}
                 <div className="space-y-2 sm:space-y-3">
                   <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Proof of Payment (R661.25) *
                   </label>
-                  <div className="space-y-2 sm:space-y-3">
+                  
+                  {/* Pay Now Button */}
+                  <div className="mb-3">
+                    <button
+                      type="button"
+                      onClick={handlePayNow}
+                      disabled={paymentLoading}
+                      className="w-full py-3 sm:py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl text-sm sm:text-base transition-all duration-300 shadow-lg shadow-green-600/30 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {paymentLoading ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>Redirecting to PayFast...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>💰</span>
+                          <span>Pay Now with PayFast</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/10"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="px-2 bg-white/5 text-gray-400 rounded">OR upload proof</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 sm:space-y-3 mt-3">
                     {!files.proof_of_payment ? (
                       <div className="relative">
                         <input
@@ -699,7 +798,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                           onChange={handleFileChange}
                           className="block w-full text-xs sm:text-sm text-gray-400 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-amber-500/20 file:text-amber-400 hover:file:bg-amber-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
                           accept=".pdf,.jpg,.jpeg,.png"
-                          required
                         />
                       </div>
                     ) : (
@@ -732,11 +830,11 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
-                    <p className="text-[10px] sm:text-xs text-gray-500">Bank deposit/EFT slip for registration</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500">Pay online or upload bank deposit/EFT slip</p>
                   </div>
                 </div>
 
-                {/* Additional Document 1 */}
+                {/* Additional Document 1 - Optional */}
                 <div className="space-y-2 sm:space-y-3">
                   <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Additional Document 1 (Optional)
@@ -786,7 +884,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                   </div>
                 </div>
 
-                {/* Additional Document 2 */}
+                {/* Additional Document 2 - Optional */}
                 <div className="space-y-2 sm:space-y-3">
                   <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Additional Document 2 (Optional)
@@ -846,6 +944,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                       <li>• Maximum file size: 5MB per document</li>
                       <li>• Accepted formats: PDF, JPG, JPEG, PNG, DOC, DOCX</li>
                       <li>• Registration fee of R661.25 is non-refundable</li>
+                      <li>• You can pay online via PayFast or upload proof of payment</li>
                     </ul>
                   </div>
                 </div>

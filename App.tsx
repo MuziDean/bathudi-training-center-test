@@ -17,6 +17,8 @@ import AdminStudents from './pages/admin/AdminStudents';
 import AdminApplications from './pages/admin/AdminApplications';
 import AdminCMS from './pages/admin/AdminCMS';
 import AdminLogin from './pages/admin/AdminLogin';
+import PaymentSuccess from './pages/PaymentSuccess';  
+import PaymentCancel from './pages/PaymentCancel';
 // STUDENT PORTAL - COMMENTED OUT
 // import StudentLogin from './pages/StudentLogin';
 // import StudentDashboard from './pages/StudentDashboard';
@@ -30,6 +32,7 @@ import StudentContent from './pages/admin/StudentContent';
 import StudentNotifications from './pages/admin/StudentNotifications';
 import BroadcastMessages from './pages/admin/BroadcastMessages';
 import { Page, ViewMode, Student } from './types';
+
 
 const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('public');
@@ -67,7 +70,7 @@ const App: React.FC = () => {
     */
   }, []);
 
-  // Public pages routing
+  // Public pages routing - FIXED: Added PaymentSuccess and PaymentCancel
   const renderPublicPage = () => {
     switch (currentPage) {
       case Page.Home:
@@ -117,6 +120,10 @@ const App: React.FC = () => {
             setNewsId(null);
           }} 
         />;
+      case Page.PaymentSuccess:
+        return <PaymentSuccess onNavigate={setCurrentPage} />;
+      case Page.PaymentCancel:
+        return <PaymentCancel onNavigate={setCurrentPage} />;
       // STUDENT PORTAL PAGES - COMMENTED OUT
       /*
       case Page.StudentDashboard:
@@ -325,7 +332,7 @@ const App: React.FC = () => {
   }
   */
 
-  // Public view - FIXED: Added onStudentPortal prop (commented out for now)
+  // Public view
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-white font-inter selection:bg-red-500 selection:text-white">
       <Preloader />
