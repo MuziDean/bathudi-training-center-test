@@ -83,7 +83,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       // Generate a unique payment ID
       const paymentId = generatePaymentId();
       
-      // Prepare payment data - FIXED: Now matches PayFastData interface
+      // Prepare payment data
       const paymentData: PayFastData = {
         merchant_id: PAYFAST_MERCHANT_ID,
         merchant_key: PAYFAST_MERCHANT_KEY,
@@ -755,13 +755,13 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     Proof of Payment (R661.25) *
                   </label>
                   
-                  {/* Pay Now Button */}
-                  <div className="mb-3">
+                  {/* Pay Now Button - Prominently displayed */}
+                  <div className="mb-4">
                     <button
                       type="button"
                       onClick={handlePayNow}
                       disabled={paymentLoading}
-                      className="w-full py-3 sm:py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl text-sm sm:text-base transition-all duration-300 shadow-lg shadow-green-600/30 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl text-sm sm:text-base transition-all duration-300 shadow-lg shadow-green-600/30 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-green-400/30"
                     >
                       {paymentLoading ? (
                         <>
@@ -773,11 +773,14 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </>
                       ) : (
                         <>
-                          <span>💰</span>
-                          <span>Pay Now with PayFast</span>
+                          <span className="text-2xl">💰</span>
+                          <span className="text-lg">Pay Now with PayFast</span>
                         </>
                       )}
                     </button>
+                    <p className="text-xs text-center text-gray-500 mt-2">
+                      Click to pay your R661.25 registration fee securely via PayFast
+                    </p>
                   </div>
                   
                   <div className="relative">
@@ -785,7 +788,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                       <div className="w-full border-t border-white/10"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="px-2 bg-white/5 text-gray-400 rounded">OR upload proof</span>
+                      <span className="px-2 bg-white/5 text-gray-400 rounded">OR upload proof of payment</span>
                     </div>
                   </div>
                   
@@ -799,6 +802,9 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                           className="block w-full text-xs sm:text-sm text-gray-400 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-amber-500/20 file:text-amber-400 hover:file:bg-amber-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
                           accept=".pdf,.jpg,.jpeg,.png"
                         />
+                        <p className="text-[10px] text-gray-500 mt-1">
+                          If you already paid via EFT/bank deposit, upload your proof here
+                        </p>
                       </div>
                     ) : (
                       <div className="p-3 sm:p-4 bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-500/20 rounded-xl">
@@ -830,7 +836,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
-                    <p className="text-[10px] sm:text-xs text-gray-500">Pay online or upload bank deposit/EFT slip</p>
                   </div>
                 </div>
 
