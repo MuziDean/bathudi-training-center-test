@@ -20,8 +20,8 @@ export interface PayFastData {
 }
 
 /**
- * Generate PayFast signature exactly as PayFast expects
- * This follows the official PayFast documentation
+ * Generate PayFast signature - URLs should NOT be encoded in the signature string
+ * PayFast expects raw URLs in the signature calculation
  */
 export const generatePayFastSignature = (data: PayFastData, passphrase: string): string => {
   // Create an array to hold all parameter strings
@@ -30,7 +30,7 @@ export const generatePayFastSignature = (data: PayFastData, passphrase: string):
   // Get all keys and sort them alphabetically (THIS IS CRITICAL)
   const sortedKeys = Object.keys(data).sort() as Array<keyof PayFastData>;
   
-  // Build each parameter string
+  // Build each parameter string - DO NOT ENCODE URLS FOR SIGNATURE
   for (const key of sortedKeys) {
     const value = data[key];
     // Skip undefined, null, or empty values
@@ -41,17 +41,9 @@ export const generatePayFastSignature = (data: PayFastData, passphrase: string):
     // Convert to string and trim
     const stringValue = value.toString().trim();
     
-    // URL encode the value - PayFast uses a specific encoding
-    // This matches PayFast's quote_plus encoding
-    const encodedValue = encodeURIComponent(stringValue)
-      .replace(/%20/g, '+')   // Replace %20 with + for spaces
-      .replace(/!/g, '%21')
-      .replace(/'/g, '%27')
-      .replace(/\(/g, '%28')
-      .replace(/\)/g, '%29')
-      .replace(/\*/g, '%2A');
-    
-    paramStrings.push(`${key}=${encodedValue}`);
+    // For signature: DO NOT encode URLs - use raw values
+    // PayFast's documentation is clear: signature uses raw values
+    paramStrings.push(`${key}=${stringValue}`);
   }
   
   // Add the passphrase (DO NOT ENCODE THE PASSPHRASE)
@@ -60,8 +52,8 @@ export const generatePayFastSignature = (data: PayFastData, passphrase: string):
   // Join with & to create the final string
   const signatureString = paramStrings.join('&');
   
-  // Log for debugging (remove in production)
-  console.log('📝 Signature String:', signatureString);
+  // Log for debugging
+  console.log('📝 Signature String (RAW):', signatureString);
   
   // Generate MD5 hash
   const signature = CryptoJS.MD5(signatureString).toString();
