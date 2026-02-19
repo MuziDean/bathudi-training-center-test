@@ -61,8 +61,8 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Handle PayFast payment
-  const handlePayNow = async () => {
+  // Handle PayFast payment - FIXED VERSION with proper redirect
+  const handlePayNow = () => {
     // Validate required fields for payment
     if (!formData.name || !formData.surname || !formData.email) {
       alert('Please fill in your name, surname, and email before proceeding to payment.');
@@ -71,6 +71,17 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
 
     if (!formData.course) {
       alert('Please select a course before proceeding to payment.');
+      return;
+    }
+
+    // Check if credentials are configured
+    if (!PAYFAST_MERCHANT_ID || !PAYFAST_MERCHANT_KEY) {
+      alert('❌ PayFast merchant credentials are not configured. Please check your .env file.');
+      console.error('Missing credentials:', { 
+        id: PAYFAST_MERCHANT_ID ? 'Set' : 'Missing', 
+        key: PAYFAST_MERCHANT_KEY ? 'Set' : 'Missing',
+        passphrase: PAYFAST_PASSPHRASE ? 'Set' : 'Missing'
+      });
       return;
     }
 
@@ -102,10 +113,13 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
         confirmation_address: formData.email,
       };
 
+      console.log('Payment Data:', paymentData);
+
       // Generate signature
       const signature = generatePayFastSignature(paymentData, PAYFAST_PASSPHRASE);
+      console.log('Signature generated:', signature);
       
-      // Create a form to submit to PayFast
+      // Create a form to submit to PayFast (this is the working redirect method)
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = IS_SANDBOX ? PAYFAST_URLS.sandbox : PAYFAST_URLS.live;
@@ -128,9 +142,12 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       signatureInput.value = signature;
       form.appendChild(signatureInput);
       
-      // Submit the form
+      // Submit the form (this redirects to PayFast)
       document.body.appendChild(form);
+      console.log('Submitting to:', form.action);
       form.submit();
+      
+      // Note: The page will redirect, so we don't need to reset paymentLoading
       
     } catch (error) {
       console.error('Payment initiation error:', error);
