@@ -42,6 +42,19 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
   const PAYFAST_PASSPHRASE = import.meta.env.VITE_PAYFAST_PASSPHRASE || '';
   const IS_SANDBOX = import.meta.env.VITE_PAYFAST_SANDBOX === 'true';
 
+  // Debug log to check if env vars are loading
+  console.log('🔍 PayFast Config Check:', {
+    merchantId: PAYFAST_MERCHANT_ID ? '✅ Set: ' + PAYFAST_MERCHANT_ID : '❌ Missing',
+    merchantKey: PAYFAST_MERCHANT_KEY ? '✅ Set' : '❌ Missing',
+    passphrase: PAYFAST_PASSPHRASE ? '✅ Set' : '❌ Missing',
+    sandbox: IS_SANDBOX,
+    rawEnv: {
+      VITE_PAYFAST_MERCHANT_ID: import.meta.env.VITE_PAYFAST_MERCHANT_ID,
+      VITE_PAYFAST_MERCHANT_KEY: import.meta.env.VITE_PAYFAST_MERCHANT_KEY ? 'Present' : 'Missing',
+      VITE_PAYFAST_PASSPHRASE: import.meta.env.VITE_PAYFAST_PASSPHRASE ? 'Present' : 'Missing',
+    }
+  });
+
   // Fetch available courses from backend
   useEffect(() => {
     fetchCourses();
@@ -76,11 +89,11 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
 
     // Check if credentials are configured
     if (!PAYFAST_MERCHANT_ID || !PAYFAST_MERCHANT_KEY) {
-      alert('❌ PayFast merchant credentials are not configured. Please check your .env file.');
+      alert(`❌ PayFast merchant credentials are not configured.\n\nMerchant ID: ${PAYFAST_MERCHANT_ID ? '✅' : '❌'}\nMerchant Key: ${PAYFAST_MERCHANT_KEY ? '✅' : '❌'}\n\nPlease check your .env file and restart the server.`);
       console.error('Missing credentials:', { 
-        id: PAYFAST_MERCHANT_ID ? 'Set' : 'Missing', 
-        key: PAYFAST_MERCHANT_KEY ? 'Set' : 'Missing',
-        passphrase: PAYFAST_PASSPHRASE ? 'Set' : 'Missing'
+        id: PAYFAST_MERCHANT_ID || 'Missing', 
+        key: PAYFAST_MERCHANT_KEY ? 'Present' : 'Missing',
+        passphrase: PAYFAST_PASSPHRASE ? 'Present' : 'Missing'
       });
       return;
     }
@@ -151,7 +164,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       
     } catch (error) {
       console.error('Payment initiation error:', error);
-      alert('Failed to initiate payment. Please try again.');
+      alert('Failed to initiate payment. Please try again. Check console for details.');
       setPaymentLoading(false);
     }
   };
