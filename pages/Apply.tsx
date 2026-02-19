@@ -61,7 +61,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Handle PayFast payment - UPDATED with better error handling
+  // Handle PayFast payment
   const handlePayNow = async () => {
     // Validate required fields for payment
     if (!formData.name || !formData.surname || !formData.email) {
@@ -77,26 +77,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     setPaymentLoading(true);
 
     try {
-      // Debug: Check if credentials are loaded
-      console.log('🔍 PayFast Credentials:', {
-        merchant_id: PAYFAST_MERCHANT_ID,
-        merchant_key: PAYFAST_MERCHANT_KEY,
-        passphrase: PAYFAST_PASSPHRASE ? '✅ Set' : '❌ Not set',
-        isSandbox: IS_SANDBOX
-      });
-
-      if (!PAYFAST_MERCHANT_ID || !PAYFAST_MERCHANT_KEY) {
-        alert('❌ PayFast merchant credentials are not configured. Please check your .env file.');
-        setPaymentLoading(false);
-        return;
-      }
-
-      if (!PAYFAST_PASSPHRASE) {
-        alert('❌ PayFast passphrase is not configured. Please check your .env file.');
-        setPaymentLoading(false);
-        return;
-      }
-
       // Get the base URL for return/cancel pages
       const baseUrl = window.location.origin;
       
@@ -122,17 +102,13 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
         confirmation_address: formData.email,
       };
 
-      console.log('📦 Payment Data:', paymentData);
-
       // Generate signature
       const signature = generatePayFastSignature(paymentData, PAYFAST_PASSPHRASE);
-      console.log('🔐 Signature generated:', signature);
       
       // Create a form to submit to PayFast
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = IS_SANDBOX ? PAYFAST_URLS.sandbox : PAYFAST_URLS.live;
-      form.target = '_blank'; // Open in new tab to see any errors
       
       // Add all payment data as hidden inputs
       Object.entries(paymentData).forEach(([key, value]) => {
@@ -154,22 +130,11 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       
       // Submit the form
       document.body.appendChild(form);
-      console.log('🚀 Submitting to:', form.action);
-      
-      // Show a message that we're redirecting
-      alert('Redirecting to PayFast payment page...');
-      
-      // Submit the form
       form.submit();
       
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(form);
-      }, 1000);
-      
     } catch (error) {
-      console.error('❌ Payment initiation error:', error);
-      alert('Failed to initiate payment. Please try again. Check console for details.');
+      console.error('Payment initiation error:', error);
+      alert('Failed to initiate payment. Please try again.');
       setPaymentLoading(false);
     }
   };
