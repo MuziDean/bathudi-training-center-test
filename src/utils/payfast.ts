@@ -14,27 +14,49 @@ export interface PayFastData {
   amount: string;
   item_name: string;
   item_description?: string;
-  custom_int1?: string;
-  custom_str1?: string;
   email_confirmation?: '1' | '0';
   confirmation_address?: string;
   payment_method?: string;
 }
 
 export const generatePayFastSignature = (data: PayFastData, passphrase: string): string => {
-  let pfOutput = "";
+  // Create a sorted array of parameter names (alphabetical order)
+  const sortedKeys = Object.keys(data).sort() as Array<keyof PayFastData>;
   
-  const paramNames = Object.keys(data).sort() as Array<keyof PayFastData>;
+  // Build the parameter string
+  let pfOutput = '';
   
-  for (const key of paramNames) {
-    if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
-      pfOutput += `${key}=${encodeURIComponent(data[key].toString().trim()).replace(/%20/g, '+')}&`;
+  for (const key of sortedKeys) {
+    const value = data[key];
+    // Skip empty values
+    if (value === undefined || value === null || value === '') {
+      continue;
     }
+    
+    // Convert to string and URL encode with quote_plus style (spaces become +)
+    const stringValue = value.toString().trim();
+    // CRITICAL: Use the same encoding as PayFast expects
+    const encodedValue = encodeURIComponent(stringValue)
+      .replace(/%20/g, '+')  // Replace %20 with + for spaces
+      .replace(/!/g, '%21')
+      .replace(/'/g, '%27')
+      .replace(/\(/g, '%28')
+      .replace(/\)/g, '%29')
+      .replace(/\*/g, '%2A');
+    
+    pfOutput += `${key}=${encodedValue}&`;
   }
   
-  pfOutput += `passphrase=${encodeURIComponent(passphrase.trim()).replace(/%20/g, '+')}`;
+  // Add the passphrase (NO ENCODING for passphrase in the string)
+  pfOutput += `passphrase=${passphrase}`;
   
-  return CryptoJS.MD5(pfOutput).toString();
+  console.log('🔐 String for signature:', pfOutput);
+  
+  // Generate MD5 hash
+  const signature = CryptoJS.MD5(pfOutput).toString();
+  console.log('✅ Generated signature:', signature);
+  
+  return signature;
 };
 
 export const PAYFAST_URLS = {
@@ -43,5 +65,5 @@ export const PAYFAST_URLS = {
 };
 
 export const generatePaymentId = (): string => {
-  return `PAY-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+  return `PAY-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 };

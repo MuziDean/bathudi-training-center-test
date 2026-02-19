@@ -48,11 +48,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     merchantKey: PAYFAST_MERCHANT_KEY ? '✅ Set' : '❌ Missing',
     passphrase: PAYFAST_PASSPHRASE ? '✅ Set' : '❌ Missing',
     sandbox: IS_SANDBOX,
-    rawEnv: {
-      VITE_PAYFAST_MERCHANT_ID: import.meta.env.VITE_PAYFAST_MERCHANT_ID,
-      VITE_PAYFAST_MERCHANT_KEY: import.meta.env.VITE_PAYFAST_MERCHANT_KEY ? 'Present' : 'Missing',
-      VITE_PAYFAST_PASSPHRASE: import.meta.env.VITE_PAYFAST_PASSPHRASE ? 'Present' : 'Missing',
-    }
   });
 
   // Fetch available courses from backend
@@ -74,7 +69,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Handle PayFast payment - FIXED VERSION with proper redirect
+  // Handle PayFast payment - FIXED SIGNATURE VERSION
   const handlePayNow = () => {
     // Validate required fields for payment
     if (!formData.name || !formData.surname || !formData.email) {
@@ -107,44 +102,67 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       // Generate a unique payment ID
       const paymentId = generatePaymentId();
       
-      // Prepare payment data
+      // Prepare payment data with ALL fields
       const paymentData: PayFastData = {
         merchant_id: PAYFAST_MERCHANT_ID,
         merchant_key: PAYFAST_MERCHANT_KEY,
         return_url: `${baseUrl}/payment-success`,
         cancel_url: `${baseUrl}/payment-cancel`,
-        notify_url: `${baseUrl}/api/payfast/notify`, // You'll need to create this endpoint
+        notify_url: `${baseUrl}/api/payfast/notify`,
         name_first: formData.name,
         name_last: formData.surname,
         email_address: formData.email,
         cell_number: formData.mobile,
         m_payment_id: paymentId,
-        amount: '661.25', // Fixed registration fee
+        amount: '661.25',
         item_name: 'Course Registration Fee',
         item_description: `Registration fee for ${formData.course}`,
         email_confirmation: '1',
         confirmation_address: formData.email,
       };
 
-      console.log('Payment Data:', paymentData);
+      console.log('📦 Payment Data (raw):', paymentData);
 
       // Generate signature
       const signature = generatePayFastSignature(paymentData, PAYFAST_PASSPHRASE);
-      console.log('Signature generated:', signature);
+      console.log('✅ Generated signature:', signature);
       
-      // Create a form to submit to PayFast (this is the working redirect method)
+      // Create a form with parameters in the SAME ORDER as they were signed
+      // This is alphabetical order which matches the signature generation
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = IS_SANDBOX ? PAYFAST_URLS.sandbox : PAYFAST_URLS.live;
       
-      // Add all payment data as hidden inputs
-      Object.entries(paymentData).forEach(([key, value]) => {
-        if (value) {
+      // Add parameters in alphabetical order (same as signature generation)
+      // This ensures the order matches exactly what PayFast expects
+      const paramOrder = [
+        'amount', 
+        'cancel_url', 
+        'cell_number', 
+        'confirmation_address', 
+        'email_address', 
+        'email_confirmation', 
+        'item_description', 
+        'item_name', 
+        'm_payment_id', 
+        'merchant_id', 
+        'merchant_key', 
+        'name_first', 
+        'name_last', 
+        'notify_url', 
+        'return_url'
+      ];
+      
+      // Add parameters in the correct order
+      paramOrder.forEach(key => {
+        const value = paymentData[key as keyof PayFastData];
+        if (value !== undefined && value !== null && value !== '') {
           const input = document.createElement('input');
           input.type = 'hidden';
           input.name = key;
           input.value = value.toString();
           form.appendChild(input);
+          console.log(`Adding field: ${key}=${value}`);
         }
       });
       
@@ -155,12 +173,17 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       signatureInput.value = signature;
       form.appendChild(signatureInput);
       
-      // Submit the form (this redirects to PayFast)
-      document.body.appendChild(form);
-      console.log('Submitting to:', form.action);
-      form.submit();
+      console.log('🚀 Submitting to:', form.action);
+      console.log('📝 Form data being sent:', {
+        merchant_id: PAYFAST_MERCHANT_ID,
+        amount: '661.25',
+        item_name: 'Course Registration Fee',
+        signature: signature
+      });
       
-      // Note: The page will redirect, so we don't need to reset paymentLoading
+      // Submit the form
+      document.body.appendChild(form);
+      form.submit();
       
     } catch (error) {
       console.error('Payment initiation error:', error);
