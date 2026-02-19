@@ -19,65 +19,55 @@ export interface PayFastData {
   payment_method?: string;
 }
 
+/**
+ * Generate PayFast signature exactly as PayFast expects
+ * This follows the official PayFast documentation
+ */
 export const generatePayFastSignature = (data: PayFastData, passphrase: string): string => {
-  // Get all keys and sort alphabetically
-  const keys = Object.keys(data).sort() as Array<keyof PayFastData>;
+  // Create an array to hold all parameter strings
+  const paramStrings: string[] = [];
   
-  // Build the parameter string
-  let paramString = '';
-  const params: string[] = [];
+  // Get all keys and sort them alphabetically (THIS IS CRITICAL)
+  const sortedKeys = Object.keys(data).sort() as Array<keyof PayFastData>;
   
-  for (const key of keys) {
+  // Build each parameter string
+  for (const key of sortedKeys) {
     const value = data[key];
-    // Skip empty values
+    // Skip undefined, null, or empty values
     if (value === undefined || value === null || value === '') {
       continue;
     }
     
-    // Convert to string and encode properly
+    // Convert to string and trim
     const stringValue = value.toString().trim();
-    // Important: Use encodeURIComponent then replace %20 with +
-    const encodedValue = encodeURIComponent(stringValue).replace(/%20/g, '+');
     
-    paramString += `${key}=${encodedValue}&`;
-    params.push(`${key}=${encodedValue}`);
+    // URL encode the value - PayFast uses a specific encoding
+    // This matches PayFast's quote_plus encoding
+    const encodedValue = encodeURIComponent(stringValue)
+      .replace(/%20/g, '+')   // Replace %20 with + for spaces
+      .replace(/!/g, '%21')
+      .replace(/'/g, '%27')
+      .replace(/\(/g, '%28')
+      .replace(/\)/g, '%29')
+      .replace(/\*/g, '%2A');
+    
+    paramStrings.push(`${key}=${encodedValue}`);
   }
   
-  // Add passphrase (NO ENCODING for passphrase)
-  paramString += `passphrase=${passphrase}`;
-  params.push(`passphrase=${passphrase}`);
+  // Add the passphrase (DO NOT ENCODE THE PASSPHRASE)
+  paramStrings.push(`passphrase=${passphrase}`);
   
-  // Log the exact string for debugging
-  console.log('🔍 Parameter string for signature:');
-  console.log(paramString);
-  console.log('📋 Parameters in order:', params);
+  // Join with & to create the final string
+  const signatureString = paramStrings.join('&');
+  
+  // Log for debugging (remove in production)
+  console.log('📝 Signature String:', signatureString);
   
   // Generate MD5 hash
-  const signature = CryptoJS.MD5(paramString).toString();
-  console.log('✅ Generated signature:', signature);
+  const signature = CryptoJS.MD5(signatureString).toString();
+  console.log('✅ Signature:', signature);
   
   return signature;
-};
-
-export const generatePayFastSignatureAlt = (data: PayFastData, passphrase: string): string => {
-  // Alternative method - build array then join
-  const keys = Object.keys(data).sort() as Array<keyof PayFastData>;
-  const pfOutput: string[] = [];
-  
-  for (const key of keys) {
-    const value = data[key];
-    if (value !== undefined && value !== null && value !== '') {
-      const encodedValue = encodeURIComponent(value.toString().trim()).replace(/%20/g, '+');
-      pfOutput.push(`${key}=${encodedValue}`);
-    }
-  }
-  
-  pfOutput.push(`passphrase=${passphrase}`);
-  const paramString = pfOutput.join('&');
-  
-  console.log('🔍 Alternative param string:', paramString);
-  
-  return CryptoJS.MD5(paramString).toString();
 };
 
 export const PAYFAST_URLS = {
