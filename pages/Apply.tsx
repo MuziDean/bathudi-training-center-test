@@ -127,34 +127,16 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       const signature = generatePayFastSignature(paymentData, PAYFAST_PASSPHRASE);
       console.log('✅ Generated signature:', signature);
       
-      // Create a form with parameters in the SAME ORDER as they were signed
-      // This is alphabetical order which matches the signature generation
+      // Create a form to submit to PayFast
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = IS_SANDBOX ? PAYFAST_URLS.sandbox : PAYFAST_URLS.live;
       
-      // Add parameters in alphabetical order (same as signature generation)
-      // This ensures the order matches exactly what PayFast expects
-      const paramOrder = [
-        'amount', 
-        'cancel_url', 
-        'cell_number', 
-        'confirmation_address', 
-        'email_address', 
-        'email_confirmation', 
-        'item_description', 
-        'item_name', 
-        'm_payment_id', 
-        'merchant_id', 
-        'merchant_key', 
-        'name_first', 
-        'name_last', 
-        'notify_url', 
-        'return_url'
-      ];
+      // Get all keys and sort them alphabetically (same as signature generation)
+      const sortedKeys = Object.keys(paymentData).sort();
       
-      // Add parameters in the correct order
-      paramOrder.forEach(key => {
+      // Add parameters in alphabetical order
+      sortedKeys.forEach(key => {
         const value = paymentData[key as keyof PayFastData];
         if (value !== undefined && value !== null && value !== '') {
           const input = document.createElement('input');
