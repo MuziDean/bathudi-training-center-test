@@ -69,9 +69,8 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Handle PayFast payment - FIXED SIGNATURE VERSION
+  // Handle PayFast payment
   const handlePayNow = () => {
-    // Validate required fields for payment
     if (!formData.name || !formData.surname || !formData.email) {
       alert('Please fill in your name, surname, and email before proceeding to payment.');
       return;
@@ -82,27 +81,17 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       return;
     }
 
-    // Check if credentials are configured
     if (!PAYFAST_MERCHANT_ID || !PAYFAST_MERCHANT_KEY) {
       alert(`❌ PayFast merchant credentials are not configured.\n\nMerchant ID: ${PAYFAST_MERCHANT_ID ? '✅' : '❌'}\nMerchant Key: ${PAYFAST_MERCHANT_KEY ? '✅' : '❌'}\n\nPlease check your .env file and restart the server.`);
-      console.error('Missing credentials:', { 
-        id: PAYFAST_MERCHANT_ID || 'Missing', 
-        key: PAYFAST_MERCHANT_KEY ? 'Present' : 'Missing',
-        passphrase: PAYFAST_PASSPHRASE ? 'Present' : 'Missing'
-      });
       return;
     }
 
     setPaymentLoading(true);
 
     try {
-      // Get the base URL for return/cancel pages
       const baseUrl = window.location.origin;
-      
-      // Generate a unique payment ID
       const paymentId = generatePaymentId();
       
-      // Prepare payment data with ALL fields
       const paymentData: PayFastData = {
         merchant_id: PAYFAST_MERCHANT_ID,
         merchant_key: PAYFAST_MERCHANT_KEY,
@@ -121,21 +110,14 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
         confirmation_address: formData.email,
       };
 
-      console.log('📦 Payment Data (raw):', paymentData);
-
-      // Generate signature
       const signature = generatePayFastSignature(paymentData, PAYFAST_PASSPHRASE);
-      console.log('✅ Generated signature:', signature);
       
-      // Create a form to submit to PayFast
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = IS_SANDBOX ? PAYFAST_URLS.sandbox : PAYFAST_URLS.live;
       
-      // Get all keys and sort them alphabetically (same as signature generation)
       const sortedKeys = Object.keys(paymentData).sort();
       
-      // Add parameters in alphabetical order
       sortedKeys.forEach(key => {
         const value = paymentData[key as keyof PayFastData];
         if (value !== undefined && value !== null && value !== '') {
@@ -144,32 +126,21 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
           input.name = key;
           input.value = value.toString();
           form.appendChild(input);
-          console.log(`Adding field: ${key}=${value}`);
         }
       });
       
-      // Add signature
       const signatureInput = document.createElement('input');
       signatureInput.type = 'hidden';
       signatureInput.name = 'signature';
       signatureInput.value = signature;
       form.appendChild(signatureInput);
       
-      console.log('🚀 Submitting to:', form.action);
-      console.log('📝 Form data being sent:', {
-        merchant_id: PAYFAST_MERCHANT_ID,
-        amount: '661.25',
-        item_name: 'Course Registration Fee',
-        signature: signature
-      });
-      
-      // Submit the form
       document.body.appendChild(form);
       form.submit();
       
     } catch (error) {
       console.error('Payment initiation error:', error);
-      alert('Failed to initiate payment. Please try again. Check console for details.');
+      alert('Failed to initiate payment. Please try again.');
       setPaymentLoading(false);
     }
   };
@@ -273,7 +244,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     return true;
   };
 
-  // Submit form
+  // Submit form - FIXED: Now sends BOTH course and course_id
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -289,23 +260,37 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     try {
       const formDataToSend = new FormData();
       
+      // Log the course value for debugging
+      console.log('🎓 Course selected:', formData.course);
+      console.log('🎓 Course ID:', formData.course_id);
+      
+      // Send ALL form fields
       Object.entries(formData).forEach(([key, value]) => {
+        // Skip empty values
+        if (value === null || value === undefined || value === '') {
+          return;
+        }
+        
         if (key === 'course') {
-          formDataToSend.append('course_id', value);
+          // IMPORTANT: Send the course value as BOTH 'course' and 'course_id'
+          // This ensures the backend receives it regardless of which field it expects
+          formDataToSend.append('course', value);        // Send as course
+          formDataToSend.append('course_id', value);     // Also send as course_id
+          console.log('📤 Sending course as:', value);
         } else {
           formDataToSend.append(key, value.toString());
         }
       });
       
+      // Add files
       Object.entries(files).forEach(([key, file]) => {
         if (file) {
           formDataToSend.append(key, file, file.name);
+          console.log('📤 Sending file:', key, file.name);
         }
       });
 
-      console.log('Sending application data...');
-      
-      alert('📤 Submitting your application... Please wait while we process your information.');
+      console.log('📤 Sending application data...');
       
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
       const response = await fetch(`${API_BASE_URL}/applications/`, {
@@ -313,16 +298,17 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
         body: formDataToSend,
       });
 
-      console.log('Response status:', response.status);
+      console.log('📡 Response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Application submitted successfully:', data);
+        console.log('✅ Application submitted successfully:', data);
         
         alert(`✅ Application Submitted Successfully!\n\n📋 Application ID: ${data.id || 'Pending'}\n👤 Name: ${formData.name} ${formData.surname}\n🎓 Course: ${formData.course}\n\n📬 We will contact you via email or phone within 3-5 working days.\n\nYour application will now appear in the admin dashboard for review.`);
         
         setSubmitStatus('success');
         
+        // Reset form
         setFormData({
           name: '',
           surname: '',
@@ -347,7 +333,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
         
       } else {
         const errorText = await response.text();
-        console.error('Submission error response:', errorText);
+        console.error('❌ Submission error response:', errorText);
         
         try {
           const errorData = JSON.parse(errorText);
@@ -790,7 +776,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                     Proof of Payment (R661.25) *
                   </label>
                   
-                  {/* Pay Now Button - Prominently displayed */}
+                  {/* Pay Now Button */}
                   <div className="mb-4">
                     <button
                       type="button"
