@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Page } from '../types';
-import { generatePayFastSignature, PAYFAST_URLS, generatePaymentId, PayFastData } from '../src/utils/payfast';
 
 interface ApplyProps {
   onNavigate: (page: Page) => void;
@@ -8,7 +7,6 @@ interface ApplyProps {
 
 const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(false);
-  const [paymentLoading, setPaymentLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [availableCourses, setAvailableCourses] = useState<any[]>([]);
@@ -25,7 +23,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     education_level: '',
     previous_school: '',
     course: '',
-    course_id: '',
   });
   
   const [files, setFiles] = useState({
@@ -36,19 +33,8 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     additional_doc_2: null as File | null,
   });
 
-  // PayFast configuration from environment variables
-  const PAYFAST_MERCHANT_ID = import.meta.env.VITE_PAYFAST_MERCHANT_ID || '';
-  const PAYFAST_MERCHANT_KEY = import.meta.env.VITE_PAYFAST_MERCHANT_KEY || '';
-  const PAYFAST_PASSPHRASE = import.meta.env.VITE_PAYFAST_PASSPHRASE || '';
-  const IS_SANDBOX = import.meta.env.VITE_PAYFAST_SANDBOX === 'true';
-
-  // Debug log to check if env vars are loading
-  console.log('🔍 PayFast Config Check:', {
-    merchantId: PAYFAST_MERCHANT_ID ? '✅ Set: ' + PAYFAST_MERCHANT_ID : '❌ Missing',
-    merchantKey: PAYFAST_MERCHANT_KEY ? '✅ Set' : '❌ Missing',
-    passphrase: PAYFAST_PASSPHRASE ? '✅ Set' : '❌ Missing',
-    sandbox: IS_SANDBOX,
-  });
+  // API Base URL - Simplified
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
   // Fetch available courses from backend
   useEffect(() => {
@@ -57,7 +43,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
 
   const fetchCourses = async () => {
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      console.log('Fetching courses from:', `${API_BASE_URL}/courses/`);
       const response = await fetch(`${API_BASE_URL}/courses/`);
       if (response.ok) {
         const data = await response.json();
@@ -66,82 +52,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       }
     } catch (error) {
       console.error('Error fetching courses:', error);
-    }
-  };
-
-  // Handle PayFast payment
-  const handlePayNow = () => {
-    if (!formData.name || !formData.surname || !formData.email) {
-      alert('Please fill in your name, surname, and email before proceeding to payment.');
-      return;
-    }
-
-    if (!formData.course) {
-      alert('Please select a course before proceeding to payment.');
-      return;
-    }
-
-    if (!PAYFAST_MERCHANT_ID || !PAYFAST_MERCHANT_KEY) {
-      alert(`❌ PayFast merchant credentials are not configured.\n\nMerchant ID: ${PAYFAST_MERCHANT_ID ? '✅' : '❌'}\nMerchant Key: ${PAYFAST_MERCHANT_KEY ? '✅' : '❌'}\n\nPlease check your .env file and restart the server.`);
-      return;
-    }
-
-    setPaymentLoading(true);
-
-    try {
-      const baseUrl = window.location.origin;
-      const paymentId = generatePaymentId();
-      
-      const paymentData: PayFastData = {
-        merchant_id: PAYFAST_MERCHANT_ID,
-        merchant_key: PAYFAST_MERCHANT_KEY,
-        return_url: `${baseUrl}/payment-success`,
-        cancel_url: `${baseUrl}/payment-cancel`,
-        notify_url: `${baseUrl}/api/payfast/notify`,
-        name_first: formData.name,
-        name_last: formData.surname,
-        email_address: formData.email,
-        cell_number: formData.mobile,
-        m_payment_id: paymentId,
-        amount: '661.25',
-        item_name: 'Course Registration Fee',
-        item_description: `Registration fee for ${formData.course}`,
-        email_confirmation: '1',
-        confirmation_address: formData.email,
-      };
-
-      const signature = generatePayFastSignature(paymentData, PAYFAST_PASSPHRASE);
-      
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = IS_SANDBOX ? PAYFAST_URLS.sandbox : PAYFAST_URLS.live;
-      
-      const sortedKeys = Object.keys(paymentData).sort();
-      
-      sortedKeys.forEach(key => {
-        const value = paymentData[key as keyof PayFastData];
-        if (value !== undefined && value !== null && value !== '') {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = value.toString();
-          form.appendChild(input);
-        }
-      });
-      
-      const signatureInput = document.createElement('input');
-      signatureInput.type = 'hidden';
-      signatureInput.name = 'signature';
-      signatureInput.value = signature;
-      form.appendChild(signatureInput);
-      
-      document.body.appendChild(form);
-      form.submit();
-      
-    } catch (error) {
-      console.error('Payment initiation error:', error);
-      alert('Failed to initiate payment. Please try again.');
-      setPaymentLoading(false);
     }
   };
 
@@ -178,7 +88,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     }
   };
 
-  // Format file name to prevent overflow
+  // Format file name
   const formatFileName = (fileName: string, maxLength: number = 20): string => {
     if (fileName.length <= maxLength) return fileName;
     const extension = fileName.substring(fileName.lastIndexOf('.'));
@@ -244,7 +154,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     return true;
   };
 
-  // Submit form - FIXED: Now sends BOTH course and course_id
+  // Submit form - SIMPLIFIED VERSION
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -260,24 +170,9 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
     try {
       const formDataToSend = new FormData();
       
-      // Log the course value for debugging
-      console.log('🎓 Course selected:', formData.course);
-      console.log('🎓 Course ID:', formData.course_id);
-      
-      // Send ALL form fields
+      // Add all form fields
       Object.entries(formData).forEach(([key, value]) => {
-        // Skip empty values
-        if (value === null || value === undefined || value === '') {
-          return;
-        }
-        
-        if (key === 'course') {
-          // IMPORTANT: Send the course value as BOTH 'course' and 'course_id'
-          // This ensures the backend receives it regardless of which field it expects
-          formDataToSend.append('course', value);        // Send as course
-          formDataToSend.append('course_id', value);     // Also send as course_id
-          console.log('📤 Sending course as:', value);
-        } else {
+        if (value) {
           formDataToSend.append(key, value.toString());
         }
       });
@@ -286,13 +181,11 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       Object.entries(files).forEach(([key, file]) => {
         if (file) {
           formDataToSend.append(key, file, file.name);
-          console.log('📤 Sending file:', key, file.name);
         }
       });
 
-      console.log('📤 Sending application data...');
+      console.log('📤 Submitting to:', `${API_BASE_URL}/applications/`);
       
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
       const response = await fetch(`${API_BASE_URL}/applications/`, {
         method: 'POST',
         body: formDataToSend,
@@ -302,9 +195,9 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Application submitted successfully:', data);
+        console.log('✅ Success:', data);
         
-        alert(`✅ Application Submitted Successfully!\n\n📋 Application ID: ${data.id || 'Pending'}\n👤 Name: ${formData.name} ${formData.surname}\n🎓 Course: ${formData.course}\n\n📬 We will contact you via email or phone within 3-5 working days.\n\nYour application will now appear in the admin dashboard for review.`);
+        alert(`✅ Application Submitted Successfully!`);
         
         setSubmitStatus('success');
         
@@ -321,7 +214,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
           education_level: '',
           previous_school: '',
           course: '',
-          course_id: '',
         });
         setFiles({
           id_document: null,
@@ -333,36 +225,16 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
         
       } else {
         const errorText = await response.text();
-        console.error('❌ Submission error response:', errorText);
-        
-        try {
-          const errorData = JSON.parse(errorText);
-          console.error('Submission error JSON:', errorData);
-          
-          let errorMsg = errorData.error || errorData.detail || errorData.message || 'Failed to submit application. Please try again.';
-          
-          alert(`❌ Submission Error:\n\n${errorMsg}\n\nPlease check your information and try again.`);
-          
-          setSubmitStatus('error');
-          setErrorMessage(errorMsg);
-        } catch (parseError) {
-          console.error('Error parsing error response:', parseError);
-          const errorMsg = `Server error (${response.status}): ${errorText.substring(0, 100)}...`;
-          
-          alert(`❌ Server Error (${response.status}):\n\n${errorText.substring(0, 200)}`);
-          
-          setSubmitStatus('error');
-          setErrorMessage(errorMsg);
-        }
+        console.error('❌ Error response:', errorText);
+        alert(`Submission failed: ${response.status}`);
+        setSubmitStatus('error');
+        setErrorMessage(`Server error: ${response.status}`);
       }
     } catch (error: any) {
-      console.error('Network error:', error);
-      const errorMsg = 'Network error. Please check your connection and try again.';
-      
-      alert(`🌐 Network Error:\n\n${error.message || errorMsg}\n\nPlease check your internet connection and try again.`);
-      
+      console.error('❌ Network error:', error);
+      alert(`Network error: ${error.message}. Please check your connection.`);
       setSubmitStatus('error');
-      setErrorMessage(errorMsg);
+      setErrorMessage(error.message);
     } finally {
       setLoading(false);
     }
@@ -395,7 +267,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
           <div className="inline-flex flex-col sm:flex-row items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-full mb-4 sm:mb-6">
             <span className="text-amber-400 font-bold text-sm sm:text-base">📢 Registration Fee: R661.25</span>
             <span className="hidden sm:inline mx-3 text-gray-400">•</span>
-            <span className="text-gray-300 text-xs sm:text-sm">Pay online or upload proof</span>
+            <span className="text-gray-300 text-xs sm:text-sm">Required for all applications</span>
           </div>
           <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto">
             Complete the form below to apply for your chosen course. All fields are required unless marked optional.
@@ -770,50 +642,12 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                   </div>
                 </div>
 
-                {/* Proof of Payment - With Pay Now Button */}
+                {/* Proof of Payment */}
                 <div className="space-y-2 sm:space-y-3">
                   <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Proof of Payment (R661.25) *
                   </label>
-                  
-                  {/* Pay Now Button */}
-                  <div className="mb-4">
-                    <button
-                      type="button"
-                      onClick={handlePayNow}
-                      disabled={paymentLoading}
-                      className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl text-sm sm:text-base transition-all duration-300 shadow-lg shadow-green-600/30 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-green-400/30"
-                    >
-                      {paymentLoading ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          <span>Redirecting to PayFast...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-2xl">💰</span>
-                          <span className="text-lg">Pay Now with PayFast</span>
-                        </>
-                      )}
-                    </button>
-                    <p className="text-xs text-center text-gray-500 mt-2">
-                      Click to pay your R661.25 registration fee securely via PayFast
-                    </p>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/10"></div>
-                    </div>
-                    <div className="relative flex justify-center text-xs">
-                      <span className="px-2 bg-white/5 text-gray-400 rounded">OR upload proof of payment</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 sm:space-y-3 mt-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {!files.proof_of_payment ? (
                       <div className="relative">
                         <input
@@ -822,10 +656,8 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                           onChange={handleFileChange}
                           className="block w-full text-xs sm:text-sm text-gray-400 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-amber-500/20 file:text-amber-400 hover:file:bg-amber-500/30 cursor-pointer bg-black/30 border border-white/10 rounded-xl"
                           accept=".pdf,.jpg,.jpeg,.png"
+                          required
                         />
-                        <p className="text-[10px] text-gray-500 mt-1">
-                          If you already paid via EFT/bank deposit, upload your proof here
-                        </p>
                       </div>
                     ) : (
                       <div className="p-3 sm:p-4 bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-500/20 rounded-xl">
@@ -857,10 +689,11 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     )}
+                    <p className="text-[10px] sm:text-xs text-gray-500">Bank deposit/EFT slip for R661.25 registration</p>
                   </div>
                 </div>
 
-                {/* Additional Document 1 - Optional */}
+                {/* Additional Document 1 */}
                 <div className="space-y-2 sm:space-y-3">
                   <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Additional Document 1 (Optional)
@@ -910,7 +743,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                   </div>
                 </div>
 
-                {/* Additional Document 2 - Optional */}
+                {/* Additional Document 2 */}
                 <div className="space-y-2 sm:space-y-3">
                   <label className="block text-xs sm:text-sm font-medium text-gray-300">
                     Additional Document 2 (Optional)
@@ -970,7 +803,6 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
                       <li>• Maximum file size: 5MB per document</li>
                       <li>• Accepted formats: PDF, JPG, JPEG, PNG, DOC, DOCX</li>
                       <li>• Registration fee of R661.25 is non-refundable</li>
-                      <li>• You can pay online via PayFast or upload proof of payment</li>
                     </ul>
                   </div>
                 </div>
@@ -1018,7 +850,7 @@ const ApplicationForm: React.FC<ApplyProps> = ({ onNavigate }) => {
               
               <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-white/10">
                 <p className="text-center text-gray-500 text-[10px] sm:text-xs">
-                  By submitting, you agree to our Terms of Service and confirm that all information is accurate.
+                  By submitting this application, you agree to our Terms of Service and confirm that all information provided is accurate.
                 </p>
               </div>
             </div>
