@@ -3,6 +3,7 @@ import logging
 import urllib.parse
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
@@ -38,6 +39,7 @@ def generate_pf_signature(data, passphrase=None):
         
     return hashlib.md5(pf_string.encode('utf-8')).hexdigest()
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_payfast_payment(request):
@@ -47,7 +49,7 @@ def create_payfast_payment(request):
     """
     try:
         data = request.data
-        amount = data.get('amount', settings.REGISTRATION_FEE_AMOUNT)
+        amount = data.get('amount', getattr(settings, 'REGISTRATION_FEE_AMOUNT', '661.25'))
         item_name = data.get('item_name', 'Bathudi Course Application Fee')
         email = data.get('email_address')
         
